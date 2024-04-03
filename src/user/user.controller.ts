@@ -15,9 +15,10 @@ export class UserController {
   }
 
   @Get()
-  async getUsersWithRole(@Query('page') page: number, @Query('limit') limit: number): Promise<{ data: any[], total: number }> {
+  async getUsersWithRole(@Query('page') page: number, @Query('limit') limit: number, @Query('firstName') firstName: string,
+    @Query('lastName') lastName: string): Promise<{ data: any[], total: number }> {
     try {
-      return await this.userService.getUsersWithRoles(page,limit)
+      return await this.userService.getUsersWithRoles(page, limit, firstName, lastName)
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -13,7 +13,7 @@ export class Role {
   @Column()
   description: string;
 
-  @Column({ type: 'simple-json' }) // Assuming menuAccess is stored as JSON
+  @Column({ type: 'simple-json', default: null }) // Assuming menuAccess is stored as JSON
   menuAccess: { [key: string]: any };
 
   @OneToMany(() => User, user => user.role)

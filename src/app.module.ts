@@ -19,6 +19,10 @@ import { OrderModule } from './order/order.module';
 import { Customer } from './customer/entity/customer.entity';
 import { Feedback } from './feedback/entity/feedback.entity';
 import { LeaveRequest } from './leave-request/entity/leave-request.entity';
+import { ProductModule } from './product/product.module';
+import { Product } from './product/entity/product.entity';
+import { IteamModule } from './iteam/iteam.module';
+import { Iteam } from './iteam/entity/iteam.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -31,7 +35,7 @@ import { LeaveRequest } from './leave-request/entity/leave-request.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, Role,Attendance, Customer, Feedback, LeaveRequest],
+        entities: [User, Role,Attendance, Customer, Feedback, LeaveRequest, Product, Iteam],
         synchronize: true,
       }),
       inject: [ConfigService],
@@ -44,6 +48,8 @@ import { LeaveRequest } from './leave-request/entity/leave-request.entity';
     FeedbackModule,
     LeaveRequestModule,
     OrderModule,
+    ProductModule,
+    IteamModule,
   ],
   controllers: [AppController],
   providers: [AppService, 

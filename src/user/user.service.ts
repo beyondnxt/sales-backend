@@ -14,29 +14,38 @@ export class UserService {
         return user;
     }
 
-    async getUsersWithRoles(page: number = 1, limit: number = 10): Promise<{ data: any[], total: number }> {
+    async getUsersWithRoles(page: number = 1, limit: number = 10, firstName?: string, lastName?: string): Promise<{ data: any[], total: number }> {
         const skip = (page - 1) * limit;
-    
-        const usersWithRoles = await this.userRepository.createQueryBuilder('user')
+
+        let query = this.userRepository.createQueryBuilder('user')
             .leftJoinAndSelect('user.role', 'role')
             .skip(skip)
-            .take(limit)
-            .getMany();
-    
-        const totalCount = await this.userRepository.createQueryBuilder('user')
-            .getCount();
-    
-        return { 
+            .take(limit);
+
+        if (firstName) {
+            query = query.andWhere('user.firstName = :firstName', { firstName });
+        }
+
+        if (lastName) {
+            query = query.andWhere('user.lastName = :lastName', { lastName });
+        }
+
+        const usersWithRoles = await query.getMany();
+
+        const totalCount = await this.userRepository.createQueryBuilder('user').getCount();
+
+        return {
             data: usersWithRoles.map(user => ({
-            id: user.id,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            phoneNumber: user.phoneNumber,
-            email: user.email,
-            roleName: user.role.name,
-            status: user.status
-        })), 
-        total: totalCount };
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                phoneNumber: user.phoneNumber,
+                email: user.email,
+                roleName: user.role.name,
+                status: user.status
+            })),
+            total: totalCount
+        };
     }
 
     async getUsers(page: number = 1, limit: number = 10): Promise<{ data: User[]; total: number }> {
@@ -82,9 +91,9 @@ export class UserService {
     async deleteUser(id: number): Promise<{ message: string }> {
         const result = await this.userRepository.delete(id);
         if (result.affected === 0) {
-          throw new NotFoundException(`User with id ${id} not found`);
+            throw new NotFoundException(`User with id ${id} not found`);
         }
         return { message: `Successfully deleted id ${id}` };
-      }
-      
+    }
+
 }

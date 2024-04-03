@@ -28,7 +28,7 @@ export class User {
     @Column()
     password: string;
 
-    @Column({ name: 'roleId' })
+    @Column({ name: 'roleId', default: null })
     roleId: number
 
     @ManyToOne(() => Role, role => role.user)
