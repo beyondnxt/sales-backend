@@ -22,7 +22,6 @@ import { LeaveRequest } from './leave-request/entity/leave-request.entity';
 import { ProductModule } from './product/product.module';
 import { Product } from './product/entity/product.entity';
 import { IteamModule } from './iteam/iteam.module';
-import { Iteam } from './iteam/entity/iteam.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -35,7 +34,7 @@ import { Iteam } from './iteam/entity/iteam.entity';
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
         database: configService.get('DB_NAME'),
-        entities: [User, Role,Attendance, Customer, Feedback, LeaveRequest, Product, Iteam],
+        entities: [User, Role,Attendance, Customer, Feedback, LeaveRequest, Product],
         synchronize: true,
       }),
       inject: [ConfigService],
