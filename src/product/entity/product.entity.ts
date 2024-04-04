@@ -29,4 +29,19 @@ export class Product {
     @Column({default: null})
     companyName: string
 
+    @Column({default: null})
+    sellingPrice: string
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    createdOn: Date;
+
+    @Column()
+    createdBy: number
+
+    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    updatedOn: Date;
+
+    @Column()
+    updatedBy: number
+
 }

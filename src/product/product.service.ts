@@ -1,15 +1,79 @@
-import { Injectable } from '@nestjs/common';
-import { Product } from './entity/product.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-// import { CreateProductDto } from './dto/product.dto';
+import { Like, Repository } from 'typeorm';
+import { Product } from './entity/product.entity';
+import { CreateProductDto } from './dto/product.dto';
 
 @Injectable()
 export class ProductService {
-    constructor(
-        @InjectRepository(Product)
-        private readonly productRepository: Repository<Product>,
-      ) {}
-    
-  
+  constructor(
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+  ) { }
+
+  async create(productData: CreateProductDto, userId: number): Promise<Product> {
+    const product = this.productRepository.create(productData);
+    product.createdBy = userId
+    return await this.productRepository.save(product);
+  }
+
+  async findAll(page: number | "all" = 1, limit: number = 10, code: string, name: string,
+    model: string): Promise<{ data: Product[], total: number, fetchedCount: number }> {
+
+    const where: any = {};
+
+    if (code) {
+      where.code = Like(`%${code}%`);
+    }
+    if (name) {
+      where.name = Like(`%${name}%`);
+    }
+    if (model) {
+      where.model = Like(`%${model}%`);
+    }
+
+    let queryBuilder = this.productRepository.createQueryBuilder('product') // Use 'product' as the alias
+      .andWhere(where);
+
+    if (page !== "all") {
+      const skip = (page - 1) * limit;
+      queryBuilder = queryBuilder.skip(skip).take(limit);
+    }
+
+    const products = await queryBuilder.getMany();
+    const totalCount = await this.productRepository.count();
+
+    return {
+      data: products,
+      fetchedCount: products.length,
+      total: totalCount
+    };
+  }
+
+
+  async findOne(id: number): Promise<Product | undefined> {
+    return await this.productRepository.findOne({ where: { id } });
+  }
+
+  async update(id: number, productData: CreateProductDto): Promise<Product> {
+    try {
+      const products = await this.productRepository.findOne({ where: { id } });
+      if (!products) {
+        throw new NotFoundException(`products  with ID ${id} not found`);
+      }
+      this.productRepository.merge(products, productData);
+      return await this.productRepository.save(products);
+    } catch (error) {
+      throw new Error(`Unable to update products  : ${error.message}`);
+    }
+  }
+
+  async remove(id: number): Promise<any> {
+    const products = await this.productRepository.findOne({ where: { id } });
+    if (!products) {
+      throw new NotFoundException('Product not found');
+    }
+    await this.productRepository.remove(products);
+    return { message: `Successfully deleted id ${id}` }
+  }
 }

@@ -21,24 +21,25 @@ import { Feedback } from './feedback/entity/feedback.entity';
 import { LeaveRequest } from './leave-request/entity/leave-request.entity';
 import { ProductModule } from './product/product.module';
 import { Product } from './product/entity/product.entity';
-import { IteamModule } from './iteam/iteam.module';
+import { LeadModule } from './lead/lead.module';
+import { Lead } from './lead/entity/lead.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get('DB_HOST'),
-        port: +configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
-        entities: [User, Role,Attendance, Customer, Feedback, LeaveRequest, Product],
-        synchronize: true,
-      }),
-      inject: [ConfigService],
+  TypeOrmModule.forRootAsync({
+    imports: [ConfigModule],
+    useFactory: (configService: ConfigService) => ({
+      type: 'mysql',
+      host: configService.get('DB_HOST'),
+      port: +configService.get('DB_PORT'),
+      username: configService.get('DB_USERNAME'),
+      password: configService.get('DB_PASSWORD'),
+      database: configService.get('DB_NAME'),
+      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead],
+      synchronize: true,
     }),
+    inject: [ConfigService],
+  }),
     AuthModule,
     UserModule,
     RoleModule,
@@ -48,10 +49,10 @@ import { IteamModule } from './iteam/iteam.module';
     LeaveRequestModule,
     OrderModule,
     ProductModule,
-    IteamModule,
+    LeadModule,
   ],
   controllers: [AppController],
-  providers: [AppService, 
+  providers: [AppService,
     RequestService
   ],
 })

@@ -7,4 +7,9 @@ export class CreateProductDto {
     brandName: string
     stockAvailable: string
     companyName: string
+    sellingPrice: string
+    createdOn: Date
+    createdBy: number
+    updatedOn: Date
+    updatedBy: number
 }
