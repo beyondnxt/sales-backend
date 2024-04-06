@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Order } from "src/order/entity/order.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'product' })
 export class Product {
@@ -43,5 +44,8 @@ export class Product {
 
     @Column()
     updatedBy: number
+
+    @OneToMany(() => Order, order => order.product)
+    order: Order[];
 
 }

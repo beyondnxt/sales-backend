@@ -1,15 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, NotFoundException, Query, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, NotFoundException, Query, HttpException, HttpStatus, Req } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 import { Customer } from './entity/customer.entity';
+import { CreateCustomerDto } from './dto/customer.dto';
 
 @Controller('customers')
 export class CustomerController {
     constructor(private readonly customerService: CustomerService) { }
 
     @Post()
-    async create(@Body() customerData: Partial<Customer>): Promise<Customer> {
+    async create(@Body() customerData: CreateCustomerDto, @Req() req: Request): Promise<Customer> {
         try {
-            return await this.customerService.create(customerData);
+            const userId = req.headers['userid']
+            return await this.customerService.create(customerData, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -38,7 +40,7 @@ export class CustomerController {
     }
 
     @Put(':id')
-    async update(@Param('id') id: number, @Body() customerData: Partial<Customer>): Promise<Customer> {
+    async update(@Param('id') id: number, @Body() customerData: CreateCustomerDto): Promise<Customer> {
         try {
             const customer = await this.customerService.update(id, customerData);
             if (!customer) {

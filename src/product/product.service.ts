@@ -18,7 +18,7 @@ export class ProductService {
   }
 
   async findAll(page: number | "all" = 1, limit: number = 10, code: string, name: string,
-    model: string): Promise<{ data: Product[], total: number, fetchedCount: number }> {
+    model: string, size: string, rackNo: string, brandName: string): Promise<{ data: Product[], total: number, fetchedCount: number }> {
 
     const where: any = {};
 
@@ -30,6 +30,15 @@ export class ProductService {
     }
     if (model) {
       where.model = Like(`%${model}%`);
+    }
+    if (size) {
+      where.size = Like(`%${size}%`);
+    }
+    if (rackNo) {
+      where.rackNo = Like(`%${rackNo}%`);
+    }
+    if (brandName) {
+      where.brandName = Like(`%${brandName}%`);
     }
 
     let queryBuilder = this.productRepository.createQueryBuilder('product') // Use 'product' as the alias
@@ -51,7 +60,7 @@ export class ProductService {
   }
 
 
-  async findOne(id: number): Promise<Product | undefined> {
+  async findOne(id: number): Promise<Product> {
     return await this.productRepository.findOne({ where: { id } });
   }
 

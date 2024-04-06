@@ -23,6 +23,7 @@ import { ProductModule } from './product/product.module';
 import { Product } from './product/entity/product.entity';
 import { LeadModule } from './lead/lead.module';
 import { Lead } from './lead/entity/lead.entity';
+import { Order } from './order/entity/order.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -35,7 +36,7 @@ import { Lead } from './lead/entity/lead.entity';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead],
+      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead, Order],
       synchronize: true,
     }),
     inject: [ConfigService],

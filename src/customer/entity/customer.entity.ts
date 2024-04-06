@@ -1,5 +1,6 @@
 import { IsEmail } from "class-validator";
 import { Feedback } from "src/feedback/entity/feedback.entity";
+import { Order } from "src/order/entity/order.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'customer' })
@@ -34,4 +35,7 @@ export class Customer {
 
     @OneToMany(() => Feedback, feedback => feedback.customer)
     feedback: Feedback[];
+
+    @OneToMany(() => Order, order => order.customer)
+    order: Order[];
 }
