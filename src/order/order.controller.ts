@@ -10,7 +10,7 @@ export class OrderController {
     ) { }
 
     @Post()
-    async create(@Body() orderData: CreateOrderDto, @Req() req: Request) {
+    async create(@Body() orderData: CreateOrderDto[], @Req() req: Request) {
         try {
             const userId = req.headers['userid']
             return await this.orderService.create(orderData, userId)
