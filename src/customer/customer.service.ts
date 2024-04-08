@@ -33,13 +33,14 @@ export class CustomerService {
         return customerData;
     }
 
-    async update(id: number, customerData: CreateCustomerDto): Promise<Customer> {
+    async update(id: number, customerData: CreateCustomerDto, userId): Promise<Customer> {
         try {
             const customer = await this.customerRepository.findOne({ where: { id } });
             if (!customer) {
                 throw new NotFoundException(`customer with ID ${id} not found`);
             }
-            this.customerRepository.merge(customer, customerData);
+            customer.updatedBy = userId
+            Object.assign(customer, customerData);
             return await this.customerRepository.save(customer);
         } catch (error) {
             throw new Error(`Unable to update customer : ${error.message}`);

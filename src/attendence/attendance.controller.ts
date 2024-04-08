@@ -46,7 +46,7 @@ export class AttendanceController {
     }
 
     @Delete(':id')
-    delete(@Param('id') id: number) {
+    deleteUser(@Param('id') id: number) {
         try {
             return this.attendanceService.delete(id);
         } catch (error) {

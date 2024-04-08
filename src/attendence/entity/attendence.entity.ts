@@ -11,8 +11,11 @@ export class Attendance{
     @Column({ type: 'timestamp', default: null })
     punchOut: Date
 
-    @Column()
-    location: string
+    @Column({default: null})
+    lat: string
+
+    @Column({default: null})
+    lng: string
 
     @Column()
     createdBy: number

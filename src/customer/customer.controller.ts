@@ -40,13 +40,10 @@ export class CustomerController {
     }
 
     @Put(':id')
-    async update(@Param('id') id: number, @Body() customerData: CreateCustomerDto): Promise<Customer> {
+    async update(@Param('id') id: number, @Body() customerData: CreateCustomerDto, @Req() req: Request): Promise<Customer> {
         try {
-            const customer = await this.customerService.update(id, customerData);
-            if (!customer) {
-                throw new NotFoundException('Role not found');
-            }
-            return customer;
+            const userId = req.headers['userid']
+            return await this.customerService.update(id, customerData, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

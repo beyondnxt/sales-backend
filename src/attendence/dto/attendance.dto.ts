@@ -1,7 +1,8 @@
 export class CreateAttendanceDto{
     punchIn: Date
     punchOut: Date
-    location: string
+    lat: string
+    lng: string
     createdBy: number
     createdOn: Date
     updatedBy: number

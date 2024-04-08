@@ -13,6 +13,7 @@ export class AttendanceService {
 
     async create(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
         const attendance = this.attendanceRepository.create(createAttendanceDto);
+        attendance.punchIn = new Date()
         attendance.createdBy = userId;
         return await this.attendanceRepository.save(attendance);
     }
@@ -36,6 +37,7 @@ export class AttendanceService {
 
     async update(id: number, updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
         const attendance = await this.findById(id);
+        attendance.punchOut = new Date()
         attendance.updatedBy = userId;
         if (!attendance) {
             throw new NotFoundException(`Attendance with ID ${id} not found`);
@@ -44,11 +46,11 @@ export class AttendanceService {
         return await this.attendanceRepository.save(attendance);
     }
 
-    async delete(id: number): Promise<void> {
-        const attendance = await this.findById(id);
+    async delete(id: number): Promise<{ message: string }> {
+        const attendance = await this.attendanceRepository.delete(id);
         if (!attendance) {
             throw new NotFoundException(`Attendance with ID ${id} not found`);
         }
-        await this.attendanceRepository.remove(attendance);
+        return { message: `Successfully deleted id ${id}` };
     }
 }
