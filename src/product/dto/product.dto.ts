@@ -1,4 +1,5 @@
 export class CreateProductDto {
+    companyId: number
     code: string
     name: string
     model: string
@@ -6,7 +7,6 @@ export class CreateProductDto {
     rackNo: string
     brandName: string
     stockAvailable: string
-    companyName: string
     sellingPrice: string
     createdOn: Date
     createdBy: number

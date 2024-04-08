@@ -5,14 +5,17 @@ export class Expense{
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
-    stayExpense: string
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    stayExpense: number
 
-    @Column()
-    foodExpense: string
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    foodExpense: number
 
-    @Column()
-    travelExpense: string
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    travelExpense: number
+
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    totalExpense: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;

@@ -1,15 +1,20 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from "src/user/entity/user.entity";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'attendance'})
 export class Attendance{
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column({ type: 'timestamp' })
-    punchIn: Date
+    @ManyToOne(() => User, user => user.attendance)
+    @JoinColumn({ name: 'userId' })
+    user: User;
 
-    @Column({ type: 'timestamp', default: null })
-    punchOut: Date
+    @Column()
+    punchIn: string
+
+    @Column()
+    punchOut: string
 
     @Column({default: null})
     lat: string

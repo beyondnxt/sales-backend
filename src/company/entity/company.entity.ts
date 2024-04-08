@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Product } from "src/product/entity/product.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'company'})
 export class Company{
@@ -10,6 +11,9 @@ export class Company{
 
     @Column({ type: 'simple-json', default: null })
     address: { [key: string]: any }
+
+    @Column({default: null})
+    email: string
 
     @Column()
     phoneNo: string
@@ -25,4 +29,7 @@ export class Company{
 
     @Column()
     updatedBy: number
+
+    @OneToMany(() => Product, product => product.company)
+    product: Product[];
 }

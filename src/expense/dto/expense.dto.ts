@@ -1,7 +1,8 @@
 export class CreateExpenseDto{
-    stayExpense: string
-    foodExpense: string
-    travelExpense: string
+    stayExpense: number
+    foodExpense: number
+    travelExpense: number
+    totalExpense: number
     createdOn: Date
     createdBy: number
     updatedOn: Date

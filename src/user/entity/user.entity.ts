@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
+import { Attendance } from 'src/attendence/entity/attendence.entity';
 import { LeaveRequest } from 'src/leave-request/entity/leave-request.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
@@ -52,5 +53,9 @@ export class User {
 
     @OneToMany(() => LeaveRequest, leave => leave.user)
     leave: LeaveRequest[];
+
+    @OneToMany(() => Attendance, attendance => attendance.user)
+    attendance: Attendance[];
+
 
 }

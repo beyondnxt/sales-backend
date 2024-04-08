@@ -47,9 +47,9 @@ export class OrderService {
                 customerId: order.customer.id,
                 customerName: order.customer.name,
                 product: {
-                    productId: order.product.id,
-                    code: order.product.code,
-                    companyName: order.product.companyName
+                    // productId: order.product.id,
+                    // code: order.product.code,
+                    // companyName: order.product.companyName
                 },
                 totalAmount: order.totalAmount,
                 paymentMethod: order.paymentMethod,

@@ -3,7 +3,7 @@ import { LeadService } from './lead.service';
 import { Lead } from './entity/lead.entity';
 import { CreateLeadDto } from './dto/lead.dto';
 
-@Controller('leads')
+@Controller('lead')
 export class LeadController {
     constructor(private readonly leadService: LeadService) { }
 
@@ -18,9 +18,9 @@ export class LeadController {
     }
 
     @Get()
-    async findAllLeads(): Promise<Lead[]> {
+    async findAllLeads(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], total: number, fetchedCount: number }> {
         try {
-            return await this.leadService.findAllLeads();
+            return await this.leadService.findAll(page, limit);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -36,9 +36,10 @@ export class LeadController {
     }
 
     @Put(':id')
-    update(@Param('id') id: number, @Body() leadData: CreateLeadDto) {
+    update(@Param('id') id: number, @Body() leadData: CreateLeadDto, @Req() req: Request) {
         try {
-            return this.leadService.update(id, leadData);
+            const userId = req.headers['userid']
+            return this.leadService.update(id, leadData, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

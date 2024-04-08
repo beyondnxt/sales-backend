@@ -17,18 +17,37 @@ export class LeadService {
     return await this.leadRepository.save(lead);
   }
 
-  async findAllLeads(): Promise<Lead[]> {
-    return await this.leadRepository.find();
-  }
+  async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], total: number, fetchedCount: number }> {
+    let queryBuilder = this.leadRepository.createQueryBuilder('product')
+
+    if (page !== "all") {
+        const skip = (page - 1) * limit;
+        queryBuilder = queryBuilder.skip(skip).take(limit);
+    }
+
+    const lead = await queryBuilder.getMany();
+    const totalCount = await this.leadRepository.count();
+
+    return {
+        data: lead,
+        fetchedCount: lead.length,
+        total: totalCount
+    };
+}
 
   async findLeadById(id: number): Promise<Lead> {
-    return await this.leadRepository.findOne({where:{id}});
+    const lead = await this.leadRepository.findOne({where:{id}})
+    if (!lead) {
+      throw new NotFoundException(`lead  with ID ${id} not found`);
+    }
+    return lead
   }
 
  
-  async update(id: number, leadData: CreateLeadDto): Promise<Lead> {
+  async update(id: number, leadData: CreateLeadDto, userId): Promise<Lead> {
     try {
       const lead = await this.leadRepository.findOne({ where: { id } });
+      lead.updatedBy = userId
       if (!lead) {
         throw new NotFoundException(`lead  with ID ${id} not found`);
       }

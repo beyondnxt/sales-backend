@@ -1,10 +1,18 @@
+import { Company } from "src/company/entity/company.entity";
 import { Order } from "src/order/entity/order.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'product' })
 export class Product {
     @PrimaryGeneratedColumn()
     id: number
+    
+    @Column({default: null})
+    companyId: number
+
+    @ManyToOne(() => Company, company => company.product)
+    @JoinColumn({ name: 'companyId' })
+    company: Company;
 
     @Column({default: null})
     code: string
@@ -26,9 +34,6 @@ export class Product {
 
     @Column({default: null})
     stockAvailable: string
-
-    @Column({default: null})
-    companyName: string
 
     @Column({default: null})
     sellingPrice: string

@@ -24,6 +24,10 @@ import { Product } from './product/entity/product.entity';
 import { LeadModule } from './lead/lead.module';
 import { Lead } from './lead/entity/lead.entity';
 import { Order } from './order/entity/order.entity';
+import { Expense } from './expense/entity/expense.entity';
+import { ExpenseModule } from './expense/expense.module';
+import { Company } from './company/entity/company.entity';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -36,7 +40,7 @@ import { Order } from './order/entity/order.entity';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead, Order],
+      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead, Order, Expense, Company],
       synchronize: true,
     }),
     inject: [ConfigService],
@@ -51,6 +55,8 @@ import { Order } from './order/entity/order.entity';
     OrderModule,
     ProductModule,
     LeadModule,
+    ExpenseModule,
+    CompanyModule
   ],
   controllers: [AppController],
   providers: [AppService,
