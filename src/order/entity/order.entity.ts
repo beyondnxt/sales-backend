@@ -22,31 +22,31 @@ export class Order{
     product: Product;
 
     @Column()
-    date: Date
+    orderDate: Date
 
-    @Column({ type: 'decimal', precision: 10, scale: 2 })
-    subtotal: number;
+    @Column()
+    description: string
 
-    @Column({ type: 'decimal', precision: 10, scale: 2 })
-    totalAmount: number;
-
-    @Column({default: null})
-    paymentMethod: string;
+    @Column()
+    qty: number
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    cashReceived: number | null;
-
+    rate: number
+    
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-    change: number | null;
+    discount: number
 
-    @Column({default: null})
-    status: string
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    taxableValue: number
 
-    @Column({default: null})
-    lat: string
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    taxRate: number
 
-    @Column({default: null})
-    lng: string
+    @Column({ type: 'decimal', precision: 10, scale: 2 })
+    subTotal: number
+
+    // @Column({ type: 'decimal', precision: 10, scale: 2 })
+    // total: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;

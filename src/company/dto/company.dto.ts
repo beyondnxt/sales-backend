@@ -3,6 +3,7 @@ export class CreateCompanyDto{
     address: { [key: string]: any }
     email: string
     phoneNo: string
+    location: string
     createdOn: Date
     createdBy: number
     updatedOn: Date

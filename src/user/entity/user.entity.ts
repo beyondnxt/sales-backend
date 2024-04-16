@@ -1,5 +1,6 @@
 import { IsEmail, IsNotEmpty } from 'class-validator';
 import { Attendance } from 'src/attendence/entity/attendence.entity';
+import { Company } from 'src/company/entity/company.entity';
 import { LeaveRequest } from 'src/leave-request/entity/leave-request.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
@@ -29,12 +30,19 @@ export class User {
     @Column()
     password: string;
 
-    @Column({ name: 'roleId', default: null })
+    @Column({ name: 'roleId' })
     roleId: number
 
     @ManyToOne(() => Role, role => role.user)
     @JoinColumn({ name: 'roleId' })
     role: Role;
+
+    @Column({ name: 'companyId'})
+    companyId: number
+
+    @ManyToOne(() => Company, company => company.user)
+    @JoinColumn({ name: 'companyId' })
+    company: Company;
 
     @Column()
     status: boolean;

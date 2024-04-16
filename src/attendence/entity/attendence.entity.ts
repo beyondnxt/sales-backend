@@ -16,11 +16,17 @@ export class Attendance{
     @Column()
     punchOut: string
 
-    @Column({default: null})
-    lat: string
+    @Column()
+    punchInDistanceFromOffice: string
+
+    @Column()
+    punchOutDistanceFromOffice: string
 
     @Column({default: null})
-    lng: string
+    punchInLocation: string
+
+    @Column({default: null})
+    punchOutLocation: string
 
     @Column()
     createdBy: number

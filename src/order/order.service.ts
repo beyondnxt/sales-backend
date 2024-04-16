@@ -26,7 +26,6 @@ export class OrderService {
         return await this.orderRepository.save(orders);
     }
 
-
     async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], total: number, fetchedCount: number }> {
 
         let queryBuilder = this.orderRepository.createQueryBuilder('order')
@@ -51,13 +50,6 @@ export class OrderService {
                     // code: order.product.code,
                     // companyName: order.product.companyName
                 },
-                totalAmount: order.totalAmount,
-                paymentMethod: order.paymentMethod,
-                cashReceived: order.cashReceived,
-                change: order.change,
-                status: order.status,
-                lat: order.lat,
-                lng: order.lng,
                 createdBy: order.createdBy,
                 createdOn: order.createdOn
             })),
