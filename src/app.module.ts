@@ -28,6 +28,8 @@ import { Expense } from './expense/entity/expense.entity';
 import { ExpenseModule } from './expense/expense.module';
 import { Company } from './company/entity/company.entity';
 import { CompanyModule } from './company/company.module';
+import { TaskModule } from './task/task.module';
+import { Task } from './task/entity/task.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -40,7 +42,7 @@ import { CompanyModule } from './company/company.module';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead, Order, Expense, Company],
+      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead, Order, Expense, Company, Task],
       synchronize: true,
     }),
     inject: [ConfigService],
@@ -56,7 +58,8 @@ import { CompanyModule } from './company/company.module';
     ProductModule,
     LeadModule,
     ExpenseModule,
-    CompanyModule
+    CompanyModule,
+    TaskModule
   ],
   controllers: [AppController],
   providers: [AppService,

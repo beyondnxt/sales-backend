@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './entity/product.entity';
 import { CreateProductDto } from './dto/product.dto';
@@ -8,10 +8,9 @@ export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
   @Post()
-  async create(@Body() productData: CreateProductDto, @Req() req: Request): Promise<Product> {
+  async create(@Body() productData: CreateProductDto): Promise<Product> {
     try {
-      const userId = req.headers['userid']
-      return await this.productService.create(productData, userId);
+      return await this.productService.create(productData);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

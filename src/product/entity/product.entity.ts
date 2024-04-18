@@ -44,17 +44,17 @@ export class Product {
     @Column({default: null})
     kumariStock: string
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    createdOn: Date;
+    // @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    // createdOn: Date;
 
-    @Column()
-    createdBy: number
+    // @Column()
+    // createdBy: number
 
-    @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    updatedOn: Date;
+    // @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+    // updatedOn: Date;
 
-    @Column()
-    updatedBy: number
+    // @Column()
+    // updatedBy: number
 
     @OneToMany(() => Order, order => order.product)
     order: Order[];

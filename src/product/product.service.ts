@@ -11,9 +11,8 @@ export class ProductService {
     private readonly productRepository: Repository<Product>,
   ) { }
 
-  async create(productData: CreateProductDto, userId: number): Promise<Product> {
-    const product = this.productRepository.create(productData);
-    product.createdBy = userId
+  async create(productData: CreateProductDto): Promise<Product> {
+    const product = this.productRepository.create(productData)
     return await this.productRepository.save(product);
   }
 
@@ -58,7 +57,6 @@ export class ProductService {
       total: totalCount
     };
   }
-
 
   async findOne(id: number): Promise<Product> {
     return await this.productRepository.findOne({ where: { id } });

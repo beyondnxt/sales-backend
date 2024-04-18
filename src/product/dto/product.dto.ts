@@ -10,8 +10,8 @@ export class CreateProductDto {
     gstRate: string
     lingamStock: string
     kumariStock: string
-    createdOn: Date
-    createdBy: number
-    updatedOn: Date
-    updatedBy: number
+    // createdOn: Date
+    // createdBy: number
+    // updatedOn: Date
+    // updatedBy: number
 }
