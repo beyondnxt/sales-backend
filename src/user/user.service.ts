@@ -19,6 +19,7 @@ export class UserService {
 
         let query = this.userRepository.createQueryBuilder('user')
             .leftJoinAndSelect('user.role', 'role')
+            .leftJoinAndSelect('user.company', 'company')
             .skip(skip)
             .take(limit);
 
@@ -42,6 +43,8 @@ export class UserService {
                 phoneNumber: user.phoneNumber,
                 email: user.email,
                 roleName: user.role.name,
+                companyName: user.company.companyName,
+                createdOn: user.createdOn,
                 status: user.status
             })),
             total: totalCount
@@ -83,6 +86,7 @@ export class UserService {
         existingUser.phoneNumber = user.phoneNumber;
         existingUser.email = user.email;
         existingUser.roleId = user.roleId;
+        existingUser.companyId = user.companyId;
         existingUser.status = user.status;
 
         return await this.userRepository.save(existingUser);
