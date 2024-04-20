@@ -7,6 +7,22 @@ import { CreateProductDto } from './dto/product.dto';
 export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
+
+  @Get('csv')
+  async getUsers(): Promise<any> {
+    try {
+      const users = await this.productService.getUsers();
+      return {
+        status: HttpStatus.OK,
+        data: users,
+      };
+    } catch (error) {
+      return {
+        status: HttpStatus.INTERNAL_SERVER_ERROR,
+        error: `Failed to fetch users: ${error.message}`,
+      };
+    }
+  }
   @Post()
   async create(@Body() productData: CreateProductDto): Promise<Product> {
     try {
