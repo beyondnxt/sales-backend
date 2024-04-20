@@ -11,12 +11,18 @@ export class CompanyService {
         private readonly companyRepository: Repository<Company>
     ) { }
 
-    async create(companyData: CreateCompanyDto, userId: number): Promise<Company>{
-        const company = this.companyRepository.create(companyData)
-        company.createdBy = userId
-        return await this.companyRepository.save(company)
+    async create(companyData: CreateCompanyDto, userId: number): Promise<Company> {
+        const { latitude, longitude, ...rest } = companyData;
+        const location = `${latitude},${longitude}`;
+        
+        const company = this.companyRepository.create({
+            ...rest,
+            location,
+            createdBy: userId 
+        });
+        return await this.companyRepository.save(company);
     }
-
+    
     async findAll(page: number = 1, limit: number = 10): Promise<{ company: Company[], totalCount: number }> {
         const [company, totalCount] = await this.companyRepository.findAndCount({
             skip: (page - 1) * limit,

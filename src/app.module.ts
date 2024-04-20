@@ -30,6 +30,7 @@ import { Company } from './company/entity/company.entity';
 import { CompanyModule } from './company/company.module';
 import { TaskModule } from './task/task.module';
 import { Task } from './task/entity/task.entity';
+import { csvModule } from './csv/csv.module';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -59,7 +60,8 @@ import { Task } from './task/entity/task.entity';
     LeadModule,
     ExpenseModule,
     CompanyModule,
-    TaskModule
+    TaskModule,
+    csvModule
   ],
   controllers: [AppController],
   providers: [AppService,
@@ -74,6 +76,7 @@ export class AppModule {
       { path: 'auth/forgotPassword', method: RequestMethod.PUT },
       { path: 'auth/resetPasswordUsingId/:id', method: RequestMethod.PUT },
       { path: 'auth/email/changePassword', method: RequestMethod.POST },
+      { path: 'csv', method: RequestMethod.GET },
 
     ).forRoutes('*');
   }

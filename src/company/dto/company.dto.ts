@@ -8,4 +8,6 @@ export class CreateCompanyDto{
     createdBy: number
     updatedOn: Date
     updatedBy: number
+    latitude: number
+    longitude: number
 }
