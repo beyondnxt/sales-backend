@@ -16,10 +16,17 @@ export class TaskService {
         return await this.taskRepository.save(task)
     }
 
-    async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], total: number, fetchedCount: number }> {
+    async findAll(page: number | "all" = 1, limit: number = 10, taskType: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        const where: any = {};
+
+        if (taskType) {
+            where.taskType = taskType;
+        }
+
         let queryBuilder = this.taskRepository.createQueryBuilder('task')
             .leftJoinAndSelect('task.user', 'user')
             .leftJoinAndSelect('task.company', 'company')
+            .andWhere(where);
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
