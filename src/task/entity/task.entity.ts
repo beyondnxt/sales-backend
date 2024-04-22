@@ -17,7 +17,7 @@ export class Task {
     @JoinColumn({ name: 'companyId' })
     company: Company;
 
-    @Column()
+    @Column({default: null})
     assignTo: number
 
     @ManyToOne(() => User, user => user.task)

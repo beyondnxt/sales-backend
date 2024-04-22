@@ -56,7 +56,7 @@ export class TaskService {
                 id: task.id,
                 tasktype: task.taskType,
                 companyName: task.company.companyName,
-                assignTo: task.user.firstName,
+                assignTo:  task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
                 feedback: task.feedBack,
