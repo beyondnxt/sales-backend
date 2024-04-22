@@ -41,13 +41,13 @@ export class ProductService {
     return result.recordset;
   }
 
-  async getProductData(): Promise<void> {
+  async getProductData(): Promise<any> {
     const query = `SELECT * FROM [012425].[dbo].[DBR1_V1]`;
     const data = await this.executeQuery(query);
-    await this.insertDataIntoMysql(data);
+    return await this.insertDataIntoMysql(data);
   }
 
-  async insertDataIntoMysql(data: any[]): Promise<string> {
+  async insertDataIntoMysql(data: any[]): Promise<{ message: string }> {
     const columns = Object.keys(data[0]);
     const values = data.map(row => Object.values(row));
     const insertQuery = `INSERT INTO product (${columns.map(column => `\`${column}\``).join(', ')}) VALUES ? 
@@ -61,9 +61,8 @@ export class ProductService {
           this.mysqlConnection.end();
           return reject(error);
         }
-        console.log('Data inserted or updated successfully');
         this.mysqlConnection.end();
-        resolve('Data inserted or updated successfully');
+        resolve({message: 'Data inserted or updated successfully'});
       });
     });
   }
