@@ -4,6 +4,7 @@ import { Like, Repository } from 'typeorm';
 import { Product } from './entity/product.entity';
 import { CreateProductDto } from './dto/product.dto';
 import { ConnectionPool } from 'mssql';
+import { createWriteStream, unlink } from 'fs';
 
 @Injectable()
 export class ProductService {
@@ -27,25 +28,53 @@ export class ProductService {
   }
 
   async executeQuery(query: string): Promise<any> {
+    const pool = await this.pool.connect();
+    const result = await pool.query(query);
+    await pool.close();
+    return result.recordset;
+  }
+
+  async getProductData(): Promise<void> {
+    const query = `SELECT * FROM [012425].[dbo].[DBR1_V1]`;
+    const products = await this.executeQuery(query);
+    const csvData = this.convertToCsv(products);
+    const filePath = 'products.csv';
+    createWriteStream(filePath).write(csvData);
+    await this.uploadCsvToSqlDb(filePath);
+    unlink(filePath, (err) => {
+      if (err) throw err;
+    });
+  }
+
+  private async uploadCsvToSqlDb(filePath: string): Promise<void> {
     try {
-      await this.pool.connect();
-      const result = await this.pool.query(query);
-      await this.pool.close();
-      return result.recordset;
+      const sqlPool = new ConnectionPool({
+        type: 'mysql',
+        user: process.env.DB_USERNAME,
+        password: process.env.DB_PASSWORD,
+        server: process.env.DB_HOST,
+        port: parseInt(process.env.DB_PORT),
+        database: process.env.DB_NAME,
+      });
+      console.log('sqlPool', sqlPool)
+      await sqlPool.connect();
+      await sqlPool.query(`BULK INSERT product FROM '${filePath}' WITH (FORMAT = 'CSV', FIELDTERMINATOR = ',', ROWTERMINATOR = '\\n', FIRSTROW = 2)`);
+      await sqlPool.close();
     } catch (error) {
-      throw new Error(`Failed to execute query: ${error.message}`);
+      throw new Error(`Failed to upload CSV file to sql database: ${error.message}`);
     }
   }
 
-  async getUsers(): Promise<any[]> {
-    const query = `SELECT *  FROM [012425].[dbo].[DBR1_V1]`;
-    return await this.executeQuery(query);
+  private convertToCsv(data: any[]): string {
+    const header = Object.keys(data[0]).join(',') + '\n';
+    const rows = data.map(obj => Object.values(obj).map((value: any) => JSON.stringify(value)).join(',')).join('\n');
+    return header + rows;
   }
 
-  async create(productData: CreateProductDto): Promise<Product> {
-    const product = this.productRepository.create(productData)
-    return await this.productRepository.save(product);
-  }
+  // async create(productData: CreateProductDto): Promise<Product> {
+  //   const product = this.productRepository.create(productData)
+  //   return await this.productRepository.save(product);
+  // }
 
   async findAll(page: number | "all" = 1, limit: number = 10, code: string, name: string,
     model: string, size: string, rackNo: string, brandName: string): Promise<{ data: Product[], total: number, fetchedCount: number }> {

@@ -1,5 +1,5 @@
 import { Customer } from "src/customer/entity/customer.entity";
-import { Product } from "src/product/entity/product.entity";
+// import { Product } from "src/product/entity/product.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'order'})
@@ -14,12 +14,12 @@ export class Order{
     @JoinColumn({ name: 'customerId' })
     customer: Customer;
 
-    @Column()
-    productId: number
+    // @Column()
+    // productId: number
 
-    @ManyToOne(() => Product, product => product.order)
-    @JoinColumn({ name: 'productId' })
-    product: Product;
+    // @ManyToOne(() => Product, product => product.order)
+    // @JoinColumn({ name: 'productId' })
+    // product: Product;
 
     @Column()
     orderDate: Date

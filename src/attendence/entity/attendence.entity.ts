@@ -6,6 +6,9 @@ export class Attendance{
     @PrimaryGeneratedColumn()
     id: number
 
+    @Column()
+    userId: number
+
     @ManyToOne(() => User, user => user.attendance)
     @JoinColumn({ name: 'userId' })
     user: User;

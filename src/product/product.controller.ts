@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, Query, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Body, Param, Put, Delete, Query, HttpException, HttpStatus } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from './entity/product.entity';
 import { CreateProductDto } from './dto/product.dto';
@@ -9,28 +9,21 @@ export class ProductController {
 
 
   @Get('csv')
-  async getUsers(): Promise<any> {
+  async getProductData(): Promise<any> {
     try {
-      const users = await this.productService.getUsers();
-      return {
-        status: HttpStatus.OK,
-        data: users,
-      };
-    } catch (error) {
-      return {
-        status: HttpStatus.INTERNAL_SERVER_ERROR,
-        error: `Failed to fetch users: ${error.message}`,
-      };
-    }
-  }
-  @Post()
-  async create(@Body() productData: CreateProductDto): Promise<Product> {
-    try {
-      return await this.productService.create(productData);
+      return await this.productService.getProductData();
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+  // @Post()
+  // async create(@Body() productData: CreateProductDto): Promise<Product> {
+  //   try {
+  //     return await this.productService.create(productData);
+  //   } catch (error) {
+  //     throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+  //   }
+  // }
 
   @Get()
   async findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number = 10,
