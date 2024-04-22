@@ -42,7 +42,9 @@ export class UserService {
                 lastName: user.lastName,
                 phoneNumber: user.phoneNumber,
                 email: user.email,
+                roleId: user.roleId,
                 roleName: user.role.name,
+                companyId: user.companyId,
                 companyName: user.company.companyName,
                 createdOn: user.createdOn,
                 status: user.status
