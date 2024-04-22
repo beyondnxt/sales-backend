@@ -6,7 +6,7 @@ export class CreateTaskDto{
     status: string
     feedBack: string
     createdOn: Date
-    createdBy: number
+    createdBy: { [key: string]: any }
     updatedOn: Date
     updatedBy: number
 }

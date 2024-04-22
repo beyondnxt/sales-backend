@@ -36,8 +36,8 @@ export class Task {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 
-    @Column()
-    createdBy: number
+    @Column({ type: 'simple-json' })
+    createdBy: { [key: string]: any };
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedOn: Date;

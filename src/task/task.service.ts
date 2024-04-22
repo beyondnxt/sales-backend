@@ -3,16 +3,27 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entity/task.entity';
 import { Repository } from 'typeorm';
 import { CreateTaskDto } from './dto/task.dto';
+import { User } from 'src/user/entity/user.entity';
 
 @Injectable()
 export class TaskService {
     constructor(
-        @InjectRepository(Task) private readonly taskRepository: Repository<Task>
+        @InjectRepository(Task) private readonly taskRepository: Repository<Task>,
+        @InjectRepository(User)
+        private readonly userRepository: Repository<User>,
     ) { }
 
     async create(taskData: CreateTaskDto, userId: number): Promise<Task> {
         const task = await this.taskRepository.create(taskData)
-        task.createdBy = userId
+        if (!task.createdBy) {
+            task.createdBy = {};
+          }
+        task.createdBy.userId = userId;
+        const user = await this.userRepository.findOne({ where: { id: task.createdBy.userId } });
+        if (!user) {
+            throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+        task.createdBy.userName = user.firstName;
         return await this.taskRepository.save(task)
     }
 
@@ -46,7 +57,8 @@ export class TaskService {
                 status: task.status,
                 feedback: task.feedBack,
                 createdOn: task.createdOn,
-                createdBy: task.createdBy
+                createdBy: task.createdBy,
+                userName: task.createdBy.userName,
             })),
             fetchedCount: taskData.length,
             total: totalCount
