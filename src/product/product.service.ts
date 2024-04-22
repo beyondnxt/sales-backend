@@ -4,11 +4,12 @@ import { Like, Repository } from 'typeorm';
 import { Product } from './entity/product.entity';
 import { CreateProductDto } from './dto/product.dto';
 import { ConnectionPool } from 'mssql';
-import { createWriteStream, unlink } from 'fs';
+import * as mysql from 'mysql';
 
 @Injectable()
 export class ProductService {
   private pool: ConnectionPool;
+  private readonly mysqlConnection: mysql.Connection;
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
@@ -25,6 +26,12 @@ export class ProductService {
         encrypt: false
       }
     });
+    this.mysqlConnection = mysql.createConnection({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME
+    });
   }
 
   async executeQuery(query: string): Promise<any> {
@@ -36,39 +43,29 @@ export class ProductService {
 
   async getProductData(): Promise<void> {
     const query = `SELECT * FROM [012425].[dbo].[DBR1_V1]`;
-    const products = await this.executeQuery(query);
-    const csvData = this.convertToCsv(products);
-    const filePath = 'products.csv';
-    createWriteStream(filePath).write(csvData);
-    await this.uploadCsvToSqlDb(filePath);
-    unlink(filePath, (err) => {
-      if (err) throw err;
-    });
+    const data = await this.executeQuery(query);
+    await this.insertDataIntoMysql(data);
   }
 
-  private async uploadCsvToSqlDb(filePath: string): Promise<void> {
-    try {
-      const sqlPool = new ConnectionPool({
-        type: 'mysql',
-        user: process.env.DB_USERNAME,
-        password: process.env.DB_PASSWORD,
-        server: process.env.DB_HOST,
-        port: parseInt(process.env.DB_PORT),
-        database: process.env.DB_NAME,
+  async insertDataIntoMysql(data: any[]): Promise<string> {
+    const columns = Object.keys(data[0]);
+    const values = data.map(row => Object.values(row));
+    const insertQuery = `INSERT INTO product (${columns.map(column => `\`${column}\``).join(', ')}) VALUES ? 
+                        ON DUPLICATE KEY UPDATE ${columns.map(column => `\`${column}\` = VALUES(\`${column}\`)`).join(', ')}`;
+
+    return new Promise((resolve, reject) => {
+      this.mysqlConnection.connect();
+      this.mysqlConnection.query(insertQuery, [values], (error) => {
+        if (error) {
+          console.error('Error occurred while inserting or updating data:', error);
+          this.mysqlConnection.end();
+          return reject(error);
+        }
+        console.log('Data inserted or updated successfully');
+        this.mysqlConnection.end();
+        resolve('Data inserted or updated successfully');
       });
-      console.log('sqlPool', sqlPool)
-      await sqlPool.connect();
-      await sqlPool.query(`BULK INSERT product FROM '${filePath}' WITH (FORMAT = 'CSV', FIELDTERMINATOR = ',', ROWTERMINATOR = '\\n', FIRSTROW = 2)`);
-      await sqlPool.close();
-    } catch (error) {
-      throw new Error(`Failed to upload CSV file to sql database: ${error.message}`);
-    }
-  }
-
-  private convertToCsv(data: any[]): string {
-    const header = Object.keys(data[0]).join(',') + '\n';
-    const rows = data.map(obj => Object.values(obj).map((value: any) => JSON.stringify(value)).join(',')).join('\n');
-    return header + rows;
+    });
   }
 
   // async create(productData: CreateProductDto): Promise<Product> {

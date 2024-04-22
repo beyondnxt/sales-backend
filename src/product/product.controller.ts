@@ -8,7 +8,7 @@ export class ProductController {
   constructor(private readonly productService: ProductService) { }
 
 
-  @Get('csv')
+  @Get('getProductData')
   async getProductData(): Promise<any> {
     try {
       return await this.productService.getProductData();

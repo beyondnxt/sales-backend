@@ -74,7 +74,7 @@ export class AppModule {
       { path: 'auth/forgotPassword', method: RequestMethod.PUT },
       { path: 'auth/resetPasswordUsingId/:id', method: RequestMethod.PUT },
       { path: 'auth/email/changePassword', method: RequestMethod.POST },
-      { path: 'products/csv', method: RequestMethod.GET }
+      { path: 'products/getProductData', method: RequestMethod.GET }
 
     ).forRoutes('*');
   }

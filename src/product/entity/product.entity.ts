@@ -14,7 +14,7 @@ export class Product {
     // @JoinColumn({ name: 'companyId' })
     // company: Company;
 
-    @Column({default: null})
+    @Column({unique: true, default: null})
     code: string
 
     @Column({default: null})
@@ -30,19 +30,19 @@ export class Product {
     rackNo: string
 
     @Column({default: null})
-    saleRate: string
+    Sale_rate: string
 
     @Column({default: null})
-    brandName: string
+    GST_rate: string
 
     @Column({default: null})
-    gstRate: string
+    Brand_name: string
 
     @Column({default: null})
-    lingamStock: string
+    Lingam_stock: string
 
     @Column({default: null})
-    kumariStock: string
+    Kumari_stock: string
 
     // @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     // createdOn: Date;
