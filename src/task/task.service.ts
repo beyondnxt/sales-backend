@@ -27,11 +27,15 @@ export class TaskService {
         return await this.taskRepository.save(task)
     }
 
-    async findAll(page: number | "all" = 1, limit: number = 10, taskType: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
+    async findAll(page: number | "all" = 1, limit: number = 10, taskType: string, status: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
         if (taskType) {
             where.taskType = taskType;
+        }
+
+        if (status) {
+            where.status = status;
         }
 
         let queryBuilder = this.taskRepository.createQueryBuilder('task')
