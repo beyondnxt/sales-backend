@@ -35,6 +35,7 @@ export class AttendanceService {
       ...rest,
       punchInDistanceFromOffice,
       punchIn: new Date().toTimeString().slice(0, 8),
+      status: 'Present',
       createdBy: userId,
     });
 

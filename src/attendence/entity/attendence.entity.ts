@@ -26,6 +26,9 @@ export class Attendance{
     punchOutDistanceFromOffice: string
 
     @Column()
+    status: string
+
+    @Column()
     createdBy: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

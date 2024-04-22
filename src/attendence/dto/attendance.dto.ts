@@ -4,6 +4,7 @@ export class CreateAttendanceDto{
     punchOut: string
     punchInDistanceFromOffice: string
     punchOutDistanceFromOffice: string
+    status: string
     createdBy: number
     createdOn: Date
     updatedBy: number
