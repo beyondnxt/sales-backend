@@ -9,6 +9,9 @@ export class Task {
     @Column()
     taskType: string
 
+    @Column()
+    customerName: string
+
     @Column({default: null})
     assignTo: number
 

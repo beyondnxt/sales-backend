@@ -1,5 +1,6 @@
 export class CreateTaskDto{
     taskType: string
+    customerName: string
     assignTo: number
     description: string
     status: string
