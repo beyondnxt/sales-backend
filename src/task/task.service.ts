@@ -54,12 +54,12 @@ export class TaskService {
         return {
             data: taskData.map(task => ({
                 id: task.id,
-                tasktype: task.taskType,
+                taskType: task.taskType,
                 companyName: task.company.companyName,
                 assignTo:  task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
-                feedback: task.feedBack,
+                feedBack: task.feedBack,
                 createdOn: task.createdOn,
                 createdBy: task.createdBy,
                 userName: task.createdBy.userName,
