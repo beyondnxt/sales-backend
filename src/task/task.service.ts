@@ -40,7 +40,6 @@ export class TaskService {
 
         let queryBuilder = this.taskRepository.createQueryBuilder('task')
             .leftJoinAndSelect('task.user', 'user')
-            .leftJoinAndSelect('task.company', 'company')
             .andWhere(where);
 
         if (page !== "all") {
@@ -55,6 +54,7 @@ export class TaskService {
             data: taskData.map(task => ({
                 id: task.id,
                 taskType: task.taskType,
+                customerName: task.customerName,
                 assignTo:  task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
