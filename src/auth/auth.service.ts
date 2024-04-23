@@ -33,7 +33,7 @@ export class AuthService {
         await this.userRepository.save(user);
         const token = this.jwtService.sign({ id: user.id });
 
-        return {token};
+        return { token };
     }
 
     async signIn(signInDto: userCreated): Promise<any> {
@@ -50,7 +50,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid password');
         }
         const token = this.jwtService.sign({ id: user.id });
-        const userData = { userId: user.id, roleId: user.roleId, token: token }
+        const userData = { userId: user.id, userName: user.firstName, roleId: user.roleId, token: token }
         return userData;
     }
 
