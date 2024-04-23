@@ -1,4 +1,3 @@
-import { Company } from "src/company/entity/company.entity";
 import { User } from "src/user/entity/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -9,13 +8,6 @@ export class Task {
 
     @Column()
     taskType: string
-
-    @Column({ name: 'companyId' })
-    companyId: number
-
-    @ManyToOne(() => Company, company => company.task)
-    @JoinColumn({ name: 'companyId' })
-    company: Company;
 
     @Column({default: null})
     assignTo: number

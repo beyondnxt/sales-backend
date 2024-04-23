@@ -55,7 +55,6 @@ export class TaskService {
             data: taskData.map(task => ({
                 id: task.id,
                 taskType: task.taskType,
-                companyName: task.company.companyName,
                 assignTo:  task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
