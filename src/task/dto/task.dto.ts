@@ -5,6 +5,8 @@ export class CreateTaskDto{
     description: string
     status: string
     feedBack: string
+    latitude: number
+    longitude: number
     createdOn: Date
     createdBy: { [key: string]: any }
     updatedOn: Date

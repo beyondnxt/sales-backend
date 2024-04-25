@@ -28,6 +28,9 @@ export class Task {
     @Column()
     feedBack: string
 
+    @Column()
+    location: string
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 

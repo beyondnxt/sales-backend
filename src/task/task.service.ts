@@ -14,17 +14,22 @@ export class TaskService {
     ) { }
 
     async create(taskData: CreateTaskDto, userId: number): Promise<Task> {
-        const task = await this.taskRepository.create(taskData)
+        const { latitude, longitude, ...rest } = taskData;
+        const location = `${latitude},${longitude}`;
+        const task = this.taskRepository.create({
+            ...rest,
+            location
+        });
         if (!task.createdBy) {
             task.createdBy = {};
-          }
+        }
         task.createdBy.userId = userId;
         const user = await this.userRepository.findOne({ where: { id: task.createdBy.userId } });
         if (!user) {
             throw new NotFoundException(`User with ID ${userId} not found`);
         }
         task.createdBy.userName = user.firstName;
-        return await this.taskRepository.save(task)
+        return await this.taskRepository.save(task);
     }
 
     async findAll(page: number | "all" = 1, limit: number = 10, taskType: string, status: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
@@ -55,10 +60,11 @@ export class TaskService {
                 id: task.id,
                 taskType: task.taskType,
                 customerName: task.customerName,
-                assignTo:  task.user ? task.user.firstName : null,
+                assignTo: task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
                 feedBack: task.feedBack,
+                location: task.location,
                 createdOn: task.createdOn,
                 createdBy: task.createdBy,
                 userName: task.createdBy.userName,
