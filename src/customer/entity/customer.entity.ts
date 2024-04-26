@@ -14,8 +14,8 @@ export class Customer {
     @Column()
     contactPerson: string
 
-    @Column({ type: 'simple-json', default: null })
-    address: { [key: string]: any }
+    @Column()
+    address: string
 
     @Column()
     pinCode: string

@@ -1,7 +1,7 @@
 export class CreateCustomerDto{
     name: string
     contactPerson: string
-    address: { [key: string]: any }
+    address: string
     pinCode: string
     country: string
     state: string

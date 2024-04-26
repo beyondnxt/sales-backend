@@ -38,7 +38,7 @@ export class TaskService {
     async findAll(page: number | "all" = 1, limit: number = 10,
         filters: {
             taskType: string, status: string
-            startDate: Date, assignToName: string
+            startDate: Date, assignToName: string, customerName: string
         }): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
@@ -64,6 +64,9 @@ export class TaskService {
             queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.assignToName });
         }
 
+        if (filters.customerName) {
+            queryBuilder = queryBuilder.andWhere('customer.name = :name', { name: filters.customerName });
+        }
 
         if (page !== "all") {
             const skip = (page - 1) * limit;

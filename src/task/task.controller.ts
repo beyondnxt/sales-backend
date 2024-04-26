@@ -22,9 +22,10 @@ export class TaskController {
     @Get()
     async findAll(@Query('page') page: number | "all" = 1,
         @Query('limit') limit: number = 10, @Query('taskType') taskType: string,
-        @Query('status') status: string, @Query('startDate') startDate: Date, @Query('assignToName') assignToName: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        @Query('status') status: string, @Query('startDate') startDate: Date, @Query('assignToName') assignToName: string,
+        @Query('customerName') customerName: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         try {
-            return await this.taskService.findAll(page, limit, { taskType, status, startDate, assignToName })
+            return await this.taskService.findAll(page, limit, { taskType, status, startDate, assignToName, customerName })
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
