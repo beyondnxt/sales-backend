@@ -21,8 +21,6 @@ import { Feedback } from './feedback/entity/feedback.entity';
 import { LeaveRequest } from './leave-request/entity/leave-request.entity';
 import { ProductModule } from './product/product.module';
 import { Product } from './product/entity/product.entity';
-import { LeadModule } from './lead/lead.module';
-import { Lead } from './lead/entity/lead.entity';
 import { Order } from './order/entity/order.entity';
 import { Expense } from './expense/entity/expense.entity';
 import { ExpenseModule } from './expense/expense.module';
@@ -42,7 +40,7 @@ import { Task } from './task/entity/task.entity';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Lead, Order, Expense, Company, Task],
+      entities: [User, Role, Attendance, Customer, Feedback, LeaveRequest, Product, Order, Expense, Company, Task],
       synchronize: true,
     }),
     inject: [ConfigService],
@@ -56,7 +54,6 @@ import { Task } from './task/entity/task.entity';
     LeaveRequestModule,
     OrderModule,
     ProductModule,
-    LeadModule,
     ExpenseModule,
     CompanyModule,
     TaskModule

@@ -21,7 +21,7 @@ export class TaskController {
 
     @Get()
     async findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number = 10, @Query('taskType') taskType: string,
-    @Query('status') status: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        @Query('status') status: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         try {
             return await this.taskService.findAll(page, limit, taskType, status)
         } catch (error) {
@@ -37,7 +37,15 @@ export class TaskController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
+    @Put('status')
+    async updateStatus(@Body() ids: number[], @Req() req: Request): Promise<Task[]> {
+        try {
+            const userId = req.headers['userid']
+            return await this.taskService.updateStatus(ids, userId);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @Put(':id')
     async update(@Param('id') id: number, @Body() taskData: CreateTaskDto, @Req() req: Request) {
         try {
@@ -47,6 +55,8 @@ export class TaskController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
 
     @Delete(':id')
     async remove(@Param('id') id: number) {

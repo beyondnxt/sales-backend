@@ -5,6 +5,7 @@ import { Attendance } from './entity/attendence.entity';
 import { CreateAttendanceDto } from './dto/attendance.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Company } from 'src/company/entity/company.entity';
+import { Role } from 'src/role/entity/role.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -14,13 +15,16 @@ export class AttendanceService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Company)
-    private readonly companyRepository: Repository<Company>
+    private readonly companyRepository: Repository<Company>,
+    @InjectRepository(Role)
+    private readonly roleRepository: Repository<Role>,
   ) { }
 
   async create(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId } })
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } })
     const { latitude, longitude, ...rest } = createAttendanceDto;
+    const punchInLocation = `${latitude},${longitude}`;
 
     // Calculate distance from office geolocation
     const { kilometers } = await this.calculateGeolocationDifference(
@@ -34,6 +38,7 @@ export class AttendanceService {
     const attendance = this.attendanceRepository.create({
       ...rest,
       punchInDistanceFromOffice,
+      punchInLocation: punchInLocation,
       punchIn: new Date().toTimeString().slice(0, 8),
       status: 'Present',
       createdBy: userId,
@@ -62,13 +67,58 @@ export class AttendanceService {
     return deg * (Math.PI / 180);
   }
 
-  async findAll(page: number = 1, limit: number = 10): Promise<{ data: Attendance[]; total: number }> {
-    const [attendances, total] = await this.attendanceRepository.findAndCount({
-      take: limit,
-      skip: (page - 1) * limit,
-    });
+  async findAll(page: number | "all" = 1,
+    limit: number = 10,
+    filters: {
+      startDate?: Date,
+      userName?: string,
+    }
+  ): Promise<{ data: any[], fetchedCount: number, total: number }> {
+    const whereCondition: any = {};
 
-    return { data: attendances, total };
+    let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
+      .leftJoinAndSelect('attendance.user', 'user')
+      .andWhere(whereCondition)
+      .take(limit)
+
+    if (filters.startDate) {
+      const startDate = (filters.startDate);
+      queryBuilder = queryBuilder.andWhere('DATE(attendance.createdOn) = :startDate', { startDate });
+    }
+
+    if (filters.userName) {
+      queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.userName });
+    }
+
+    if (page !== "all") {
+      const skip = (page - 1) * limit;
+      queryBuilder = queryBuilder.skip(skip).take(limit);
+    }
+
+    const [attendances, totalCount] = await Promise.all([
+      queryBuilder.getMany(),
+      queryBuilder.getCount()
+    ]);
+    return {
+      data: attendances.map(attendance => ({
+        id: attendance.id,
+        userId: attendance.userId,
+        userName: attendance.user.firstName,
+        punchIn: attendance.punchIn,
+        punchInLocation: attendance.punchInLocation,
+        punchOutLocation: attendance.punchOutLocation,
+        punchOut: attendance.punchOut,
+        punchInDistanceFromOffice: attendance.punchInDistanceFromOffice,
+        punchOutDistanceFromOffice: attendance.punchOutDistanceFromOffice,
+        status: attendance.status,
+        createdBy: attendance.createdBy,
+        createdOn: attendance.createdOn,
+        updatedBy: attendance.updatedBy,
+        updatedOn: attendance.updatedOn
+      })),
+      fetchedCount: attendances.length,
+      total: totalCount
+    };
   }
 
   async findById(id: number): Promise<Attendance | undefined> {
@@ -84,6 +134,7 @@ export class AttendanceService {
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } });
     const attendance = await this.findById(id);
     const { latitude, longitude } = updateAttendanceDto;
+    const punchOutLocation = `${latitude},${longitude}`;
 
     const { kilometers } = await this.calculateGeolocationDifference(
       company.location,
@@ -92,12 +143,38 @@ export class AttendanceService {
     );
     attendance.punchOutDistanceFromOffice = kilometers.toString();
     attendance.punchOut = new Date().toTimeString().slice(0, 8);
+    attendance.punchOutLocation = punchOutLocation
     attendance.updatedBy = userId;
     if (!attendance) {
       throw new NotFoundException(`Attendance with ID ${id} not found`);
     }
     Object.assign(attendance, updateAttendanceDto);
     return await this.attendanceRepository.save(attendance);
+  }
+
+  async updateStatus(id: number, status: string, userId: number): Promise<Attendance> {
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException(`User with ID ${userId} not found`);
+      }
+      const roleId = user.roleId;
+      const role = await this.roleRepository.findOne({ where: { id: roleId } });
+      const isAdmin = role.name == 'Admin';
+      if (isAdmin) {
+        const attendance = await this.attendanceRepository.findOne({ where: { id } });
+        if (!attendance) {
+          throw new NotFoundException(`No attendance found with the provided IDs`);
+        }
+        attendance.status = status
+        attendance.updatedBy = userId
+        return await this.attendanceRepository.save(attendance);
+      } else {
+        throw new NotFoundException(`User with ID ${userId} does not have permission to update attendance`);
+      }
+    } catch (error) {
+      throw new Error(`Unable to update attendance: ${error.message}`);
+    }
   }
 
 

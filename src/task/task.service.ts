@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Task } from './entity/task.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CreateTaskDto } from './dto/task.dto';
 import { User } from 'src/user/entity/user.entity';
+import { Role } from 'src/role/entity/role.entity';
 
 @Injectable()
 export class TaskService {
@@ -11,6 +12,8 @@ export class TaskService {
         @InjectRepository(Task) private readonly taskRepository: Repository<Task>,
         @InjectRepository(User)
         private readonly userRepository: Repository<User>,
+        @InjectRepository(Role)
+        private readonly roleRepository: Repository<Role>,
     ) { }
 
     async create(taskData: CreateTaskDto, userId: number): Promise<Task> {
@@ -60,7 +63,8 @@ export class TaskService {
                 id: task.id,
                 taskType: task.taskType,
                 customerName: task.customerName,
-                assignTo: task.user ? task.user.firstName : null,
+                assignTo: task.assignTo,
+                assignToName: task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
                 feedBack: task.feedBack,
@@ -95,6 +99,40 @@ export class TaskService {
             throw new Error(`Unable to update task  : ${error.message}`);
         }
     }
+
+    async updateStatus(ids: number[], userId: number): Promise<Task[]> {
+        try {
+            const user = await this.userRepository.findOne({ where: { id: userId } });
+            if (!user) {
+                throw new NotFoundException(`User with ID ${userId} not found`);
+            }
+            const roleId = user.roleId;
+            const role = await this.roleRepository.findOne({ where: { id: roleId } });
+            const isAdmin = role.name == 'Admin';
+            if (isAdmin) {
+                const tasks = await this.taskRepository.find({
+                    where: {
+                        id: In(ids),
+                    },
+                });
+
+                if (!tasks || tasks.length === 0) {
+                    throw new NotFoundException(`No tasks found with the provided IDs`);
+                }
+                const updatedTasks = tasks.map(task => {
+                    task.status = 'verify';
+                    task.updatedBy = userId;
+                    return task;
+                });
+                return await this.taskRepository.save(updatedTasks);
+            } else {
+                throw new NotFoundException(`User with ID ${userId} does not have permission to update tasks`);
+            }
+        } catch (error) {
+            throw new Error(`Unable to update tasks: ${error.message}`);
+        }
+    }
+
 
     async remove(id: number): Promise<any> {
         const task = await this.taskRepository.findOne({ where: { id } });

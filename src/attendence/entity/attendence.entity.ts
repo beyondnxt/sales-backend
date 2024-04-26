@@ -20,6 +20,12 @@ export class Attendance{
     punchOut: string
 
     @Column()
+    punchInLocation: string
+
+    @Column()
+    punchOutLocation: string
+
+    @Column()
     punchInDistanceFromOffice: string
 
     @Column({default: null})

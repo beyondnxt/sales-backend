@@ -18,9 +18,12 @@ export class AttendanceController {
     }
 
     @Get()
-    findAll(@Query('page') page: number, @Query('limit') limit: number): Promise<{ data: Attendance[]; total: number }> {
+    findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number,
+        @Query('startDate') startDate: Date,
+        @Query('userName') userName: string
+    ): Promise<{ data: any[], fetchedCount: number, total: number }> {
         try {
-            return this.attendanceService.findAll(page, limit);
+            return this.attendanceService.findAll(page, limit, { startDate, userName });
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -35,6 +38,16 @@ export class AttendanceController {
         }
     }
 
+    @Put('status')
+    async updateStatus(@Param('id') id: number, @Body() status: string,
+        @Req() req: Request): Promise<Attendance> {
+        try {
+            const userId = req.headers['userid']
+            return await this.attendanceService.updateStatus(id, status, userId);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     @Put(':id')
     update(@Param('id') id: number, @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
