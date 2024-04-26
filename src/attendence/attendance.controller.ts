@@ -38,8 +38,8 @@ export class AttendanceController {
         }
     }
 
-    @Put('status')
-    async updateStatus(@Param('id') id: number, @Body() status: string,
+    @Put('status/:id')
+    async updateStatus(@Param('id') id: number, @Body('status') status: string,
         @Req() req: Request): Promise<Attendance> {
         try {
             const userId = req.headers['userid']

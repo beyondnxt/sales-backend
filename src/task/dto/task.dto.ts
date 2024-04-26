@@ -1,6 +1,6 @@
-export class CreateTaskDto{
+export class CreateTaskDto {
     taskType: string
-    customerName: string
+    customerId: number
     assignTo: number
     description: string
     status: string

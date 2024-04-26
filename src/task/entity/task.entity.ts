@@ -1,3 +1,4 @@
+import { Customer } from "src/customer/entity/customer.entity";
 import { User } from "src/user/entity/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -9,10 +10,14 @@ export class Task {
     @Column()
     taskType: string
 
-    @Column()
-    customerName: string
+    @Column({ default: null })
+    customerId: number
 
-    @Column({default: null})
+    @ManyToOne(() => Customer, customer => customer.task)
+    @JoinColumn({ name: 'customerId' })
+    customer: Customer;
+
+    @Column({ default: null })
     assignTo: number
 
     @ManyToOne(() => User, user => user.task)

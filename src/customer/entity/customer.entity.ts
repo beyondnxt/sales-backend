@@ -1,6 +1,6 @@
 import { IsEmail } from "class-validator";
-import { Feedback } from "src/feedback/entity/feedback.entity";
 import { Order } from "src/order/entity/order.entity";
+import { Task } from "src/task/entity/task.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'customer' })
@@ -11,15 +11,39 @@ export class Customer {
     @Column()
     name: string
 
+    @Column()
+    contactPerson: string
+
     @Column({ type: 'simple-json', default: null })
     address: { [key: string]: any }
 
     @Column()
-    phoneNumber: string;
+    pinCode: string
+
+    @Column()
+    country: string
+
+    @Column()
+    state: string
+
+    @Column()
+    city: string
+
+    @Column()
+    area: string
 
     @Column()
     @IsEmail()
     email: string;
+
+    @Column()
+    contactNo: string;
+
+    @Column()
+    latitude: number
+
+    @Column()
+    longitude: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
@@ -33,9 +57,9 @@ export class Customer {
     @Column()
     updatedBy: number
 
-    @OneToMany(() => Feedback, feedback => feedback.customer)
-    feedback: Feedback[];
-
     @OneToMany(() => Order, order => order.customer)
     order: Order[];
+
+    @OneToMany(() => Task, task => task.customer)
+    task: Task[];
 }

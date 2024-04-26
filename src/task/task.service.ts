@@ -35,20 +35,35 @@ export class TaskService {
         return await this.taskRepository.save(task);
     }
 
-    async findAll(page: number | "all" = 1, limit: number = 10, taskType: string, status: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
+    async findAll(page: number | "all" = 1, limit: number = 10,
+        filters: {
+            taskType: string, status: string
+            startDate: Date, assignToName: string
+        }): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
-        if (taskType) {
-            where.taskType = taskType;
+        if (filters.taskType) {
+            where.taskType = filters.taskType;
         }
 
-        if (status) {
-            where.status = status;
+        if (filters.status) {
+            where.status = filters.status;
         }
 
         let queryBuilder = this.taskRepository.createQueryBuilder('task')
             .leftJoinAndSelect('task.user', 'user')
+            .leftJoinAndSelect('task.customer', 'customer')
             .andWhere(where);
+
+        if (filters.startDate) {
+            const startDate = (filters.startDate);
+            queryBuilder = queryBuilder.andWhere('DATE(task.createdOn) = :startDate', { startDate });
+        }
+
+        if (filters.assignToName) {
+            queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.assignToName });
+        }
+
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
@@ -62,7 +77,8 @@ export class TaskService {
             data: taskData.map(task => ({
                 id: task.id,
                 taskType: task.taskType,
-                customerName: task.customerName,
+                customerId: task.customerId,
+                customerName: task.customer ? task.customer.name : null,
                 assignTo: task.assignTo,
                 assignToName: task.user ? task.user.firstName : null,
                 description: task.description,

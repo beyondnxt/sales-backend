@@ -20,10 +20,11 @@ export class TaskController {
     }
 
     @Get()
-    async findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number = 10, @Query('taskType') taskType: string,
-        @Query('status') status: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
+    async findAll(@Query('page') page: number | "all" = 1,
+        @Query('limit') limit: number = 10, @Query('taskType') taskType: string,
+        @Query('status') status: string, @Query('startDate') startDate: Date, @Query('assignToName') assignToName: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         try {
-            return await this.taskService.findAll(page, limit, taskType, status)
+            return await this.taskService.findAll(page, limit, { taskType, status, startDate, assignToName })
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -55,8 +56,6 @@ export class TaskController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 
     @Delete(':id')
     async remove(@Param('id') id: number) {
