@@ -1,13 +1,14 @@
 import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put } from '@nestjs/common';
 import { MapLogService } from './map-log.service';
 import { MapLog } from './entity/map-log.entity';
+import { CreateMapLogDto } from './dto/map-log.dto';
 
 @Controller('map-log')
 export class MapLogController {
     constructor(private readonly mapLogService: MapLogService) { }
 
     @Post()
-    create(@Body() mapLogData: MapLog) {
+    create(@Body() mapLogData: CreateMapLogDto) {
         try {
             return this.mapLogService.createMapLog(mapLogData);
         } catch (error) {

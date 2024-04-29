@@ -1,9 +1,9 @@
 import { User } from "src/user/entity/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({name: 'mapLog'})
 export class MapLog{
-    @PrimaryColumn()
+    @PrimaryGeneratedColumn()
     id: number
 
     @Column()

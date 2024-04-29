@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MapLog } from './entity/map-log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateMapLogDto } from './dto/map-log.dto';
 
 @Injectable()
 export class MapLogService {
@@ -10,10 +11,22 @@ export class MapLogService {
         private readonly MapLogRepository: Repository<MapLog>,
     ) { }
 
-    async createMapLog(mapLogData: MapLog): Promise<MapLog> {
-        const MapLog = this.MapLogRepository.create(mapLogData);
-        return await this.MapLogRepository.save(MapLog);
+    async createMapLog(mapLogData: CreateMapLogDto): Promise<MapLog> {
+        try {
+            const { latitude, longitude, ...rest } = mapLogData;
+            const location = `${latitude},${longitude}`;
+    
+            const newMapLog = this.MapLogRepository.create({
+                ...rest,
+                location
+            });
+
+           return await this.MapLogRepository.save(newMapLog);
+        } catch (error) {
+            throw new Error(`Error occurred while creating MapLog: ${error.message}`);
+        }
     }
+    
 
     // async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
     //     const whereCondition: any = {};

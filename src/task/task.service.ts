@@ -88,6 +88,7 @@ export class TaskService {
                 status: task.status,
                 feedBack: task.feedBack,
                 location: task.location,
+                followUpDate: task.followUpDate,
                 createdOn: task.createdOn,
                 createdBy: task.createdBy,
                 userName: task.createdBy.userName,
