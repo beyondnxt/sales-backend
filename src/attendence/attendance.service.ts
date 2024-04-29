@@ -126,6 +126,7 @@ export class AttendanceService {
         punchInDistanceFromOffice: attendance.punchInDistanceFromOffice,
         punchOutDistanceFromOffice: attendance.punchOutDistanceFromOffice,
         status: attendance.status,
+        createdOn: attendance.createdOn,
         updatedBy: attendance.updatedBy,
         updatedOn: attendance.updatedOn
       })),
