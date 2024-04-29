@@ -1,8 +1,8 @@
 import { User } from "src/user/entity/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: 'attendance'})
-export class Attendance{
+@Entity({ name: 'attendance' })
+export class Attendance {
     @PrimaryGeneratedColumn()
     id: number
 
@@ -28,7 +28,7 @@ export class Attendance{
     @Column()
     punchInDistanceFromOffice: string
 
-    @Column({default: null})
+    @Column({ default: null })
     punchOutDistanceFromOffice: string
 
     @Column()
@@ -37,7 +37,7 @@ export class Attendance{
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date
 
-    @Column({default: null})
+    @Column({ default: null })
     updatedBy: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })

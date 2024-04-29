@@ -2,8 +2,8 @@ import { Customer } from "src/customer/entity/customer.entity";
 // import { Product } from "src/product/entity/product.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: 'order'})
-export class Order{
+@Entity({ name: 'order' })
+export class Order {
     @PrimaryGeneratedColumn()
     id: number
 
@@ -32,7 +32,7 @@ export class Order{
 
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     rate: number
-    
+
     @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
     discount: number
 
@@ -51,7 +51,7 @@ export class Order{
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 
-    @Column()
+    @Column({ default: null })
     createdBy: number
-    
+
 }

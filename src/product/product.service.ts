@@ -35,7 +35,7 @@ export class ProductService {
     });
   }
 
-  @Cron('0 0 9 * * *')
+  @Cron('0 30 22 * * *')
   async handleProductUpdate() {
     try {
       await this.getProductData();

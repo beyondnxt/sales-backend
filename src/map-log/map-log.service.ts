@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MapLog } from './entity/map-log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { Attendance } from 'src/attendence/entity/attendence.entity';
+import { Task } from 'src/task/entity/task.entity';
 import { CreateMapLogDto } from './dto/map-log.dto';
 
 @Injectable()
@@ -9,58 +11,60 @@ export class MapLogService {
     constructor(
         @InjectRepository(MapLog)
         private readonly MapLogRepository: Repository<MapLog>,
+        @InjectRepository(Attendance)
+        private readonly attendanceRepository: Repository<Attendance>,
+        @InjectRepository(Task) 
+        private readonly taskRepository: Repository<Task>,
     ) { }
 
     async createMapLog(mapLogData: CreateMapLogDto): Promise<MapLog> {
-        try {
-            const { latitude, longitude, ...rest } = mapLogData;
-            const location = `${latitude},${longitude}`;
-    
-            const newMapLog = this.MapLogRepository.create({
-                ...rest,
-                location
-            });
+        const { latitude, longitude, ...rest } = mapLogData;
+        const location = `${latitude},${longitude}`;
+        const MapLog = this.taskRepository.create({
+            ...rest,
+            location
+        });
+        return await this.MapLogRepository.save(MapLog);
+    }
 
-           return await this.MapLogRepository.save(newMapLog);
-        } catch (error) {
-            throw new Error(`Error occurred while creating MapLog: ${error.message}`);
+    async findAll(userId: number,assignTo: number, page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
+        const whereCondition: any = { userId }; // Assuming the userId column is present in each table
+    
+        let queryBuilder = this.MapLogRepository.createQueryBuilder('mapLog')
+            .innerJoin("mapLog.user", "user")
+            .andWhere("user.id = :userId", { userId })
+            .andWhere("user.id = :userId", { assignTo })
+            .andWhere(whereCondition)
+            .take(limit);
+    
+        if (page !== "all") {
+            const skip = (page - 1) * limit;
+            queryBuilder = queryBuilder.skip(skip);
         }
+    
+        const [mapLogs, totalCount] = await Promise.all([
+            queryBuilder.getMany(),
+            this.MapLogRepository.count({ where: whereCondition })
+        ]);
+    
+        const [attendances, tasks] = await Promise.all([
+            this.attendanceRepository.find({ where: { userId } }),
+            this.taskRepository.find({ where: { assignTo } })
+        ]);
+    
+        const data: any[] = [
+            ...mapLogs.map(mapLog => ({ id: mapLog.id, location: mapLog.location })),
+            ...attendances.map(attendance => ({ id: attendance.id, punchInLocation: attendance.punchInLocation })),
+            ...tasks.map(task => ({ id: task.id, taskLocation: task.location }))
+        ];
+    
+        return {
+            data,
+            fetchedCount: mapLogs.length + attendances.length + tasks.length,
+            total: totalCount
+        };
     }
     
-
-    // async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
-    //     const whereCondition: any = {};
-    
-    //     let queryBuilder = this.MapLogRepository.createQueryBuilder('mapLog')
-    //         .leftJoinAndSelect('mapLog.attendance', 'attendance')
-    //         .leftJoinAndSelect('mapLog.task', 'task')
-    //         .andWhere(whereCondition)
-    //         .take(limit);
-    
-    //     if (page !== "all") {
-    //         const skip = (page - 1) * limit;
-    //         queryBuilder = queryBuilder.skip(skip).take(limit);
-    //     }
-    
-    //     const [mapLogs, totalCount] = await Promise.all([
-    //         queryBuilder.getMany(),
-    //         queryBuilder.getCount()
-    //     ]);
-    //     return {
-    //         data: mapLogs.map(mapLog => ({
-    //             id: mapLog.id,
-    //             location: mapLog.location,
-    //             punchIn: mapLog.attendance ? mapLog.attendance.punchIn : null,
-    //             punchOut: mapLog.attendance ? mapLog.attendance.punchOut : null,
-    //             taskLocation: mapLog.task ? mapLog.task.location : null,
-    //             createdOn: mapLog.createdOn
-    //         })),
-    //         fetchedCount: mapLogs.length,
-    //         total: totalCount
-    //     };
-    // }
-    
-
     async findMapLogById(id: number): Promise<MapLog> {
         return await this.MapLogRepository.findOne({ where: { id } });
     }

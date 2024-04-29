@@ -43,7 +43,7 @@ import { MapLog } from './map-log/entity/map-log.entity';
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
       entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, Task,MapLog],
-      synchronize: true,
+      synchronize: false,
     }),
     inject: [ConfigService],
   }),

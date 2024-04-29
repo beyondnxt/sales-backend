@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query } from '@nestjs/common';
 import { MapLogService } from './map-log.service';
 import { MapLog } from './entity/map-log.entity';
 import { CreateMapLogDto } from './dto/map-log.dto';
@@ -16,16 +16,16 @@ export class MapLogController {
         }
     }
 
-//     @Get()
-//     findAll(page: number | "all" = 1,
-//     limit: number = 10
-//   ): Promise<{ data: any[], fetchedCount: number, total: number }>{
-//         try {
-//             return this.mapLogService.findAll(page, limit);
-//         } catch (error) {
-//             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-//         }
-//     }
+    @Get()
+    findAll(@Query('userId')userId: number,@Query('assignTo')assignTo: number,page: number | "all" = 1,
+    limit: number = 10
+  ): Promise<{ data: any[], fetchedCount: number, total: number }>{
+        try {
+            return this.mapLogService.findAll(userId,assignTo,page, limit);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     @Get(':id')
     async findOne(@Param('id') id: number): Promise<MapLog> {

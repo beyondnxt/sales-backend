@@ -25,13 +25,13 @@ export class Company {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 
-    @Column()
+    @Column({ default: null })
     createdBy: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedOn: Date;
 
-    @Column()
+    @Column({ default: null })
     updatedBy: number
 
     @OneToMany(() => User, user => user.company)
