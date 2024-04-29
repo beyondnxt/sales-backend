@@ -2,6 +2,7 @@ import { IsEmail, IsNotEmpty } from 'class-validator';
 import { Attendance } from 'src/attendence/entity/attendence.entity';
 import { Company } from 'src/company/entity/company.entity';
 import { LeaveRequest } from 'src/leave-request/entity/leave-request.entity';
+import { MapLog } from 'src/map-log/entity/map-log.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Task } from 'src/task/entity/task.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
@@ -68,5 +69,8 @@ export class User {
 
     @OneToMany(() => Task, task => task.user)
     task: Task[];
+
+    @OneToMany(() => MapLog, mapLog => mapLog.user)
+    mapLog: MapLog[];
 
 }

@@ -36,6 +36,9 @@ export class Task {
     @Column()
     location: string
 
+    @Column({ default: null})
+    followUpDate: Date
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 

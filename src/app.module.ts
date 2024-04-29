@@ -27,6 +27,8 @@ import { CompanyModule } from './company/company.module';
 import { TaskModule } from './task/task.module';
 import { Task } from './task/entity/task.entity';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MapLogModule } from './map-log/map-log.module';
+import { MapLog } from './map-log/entity/map-log.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -40,7 +42,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, Task],
+      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, Task,MapLog],
       synchronize: true,
     }),
     inject: [ConfigService],
@@ -55,7 +57,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     ProductModule,
     ExpenseModule,
     CompanyModule,
-    TaskModule
+    TaskModule,
+    MapLogModule
   ],
   controllers: [AppController],
   providers: [AppService,

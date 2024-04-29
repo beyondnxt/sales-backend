@@ -5,6 +5,8 @@ export class CreateTaskDto {
     description: string
     status: string
     feedBack: string
+    location: string
+    followUpDate: Date
     latitude: number
     longitude: number
     createdOn: Date
