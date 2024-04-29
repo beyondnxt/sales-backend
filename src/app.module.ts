@@ -26,9 +26,11 @@ import { Company } from './company/entity/company.entity';
 import { CompanyModule } from './company/company.module';
 import { TaskModule } from './task/task.module';
 import { Task } from './task/entity/task.entity';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [ConfigModule.forRoot(),
+    ScheduleModule.forRoot(),
   TypeOrmModule.forRootAsync({
     imports: [ConfigModule],
     useFactory: (configService: ConfigService) => ({

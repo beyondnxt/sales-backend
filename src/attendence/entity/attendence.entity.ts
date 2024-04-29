@@ -34,9 +34,6 @@ export class Attendance{
     @Column()
     status: string
 
-    @Column()
-    createdBy: number
-
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date
 

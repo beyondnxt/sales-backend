@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Post, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, Put, Query, Req } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { CreateAttendanceDto } from './dto/attendance.dto';
 import { Attendance } from './entity/attendence.entity';
@@ -7,11 +7,10 @@ import { Attendance } from './entity/attendence.entity';
 export class AttendanceController {
     constructor(private readonly attendanceService: AttendanceService) { }
 
-    @Post()
-    create(@Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    @Put('updatePunchIn/:id')
+    updatePunchIn(@Param('id') id: number,@Body() createAttendanceDto: CreateAttendanceDto, userId: number) {
         try {
-            const userId = req.headers['userid'];
-            return this.attendanceService.create(createAttendanceDto, userId);
+            return this.attendanceService.updatePunchIn(id,createAttendanceDto, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -48,11 +47,11 @@ export class AttendanceController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @Put(':id')
-    update(@Param('id') id: number, @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    @Put('updatePunchOut/:id')
+    updatePunchOut(@Param('id') id: number, @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
             const userId = req.headers['userid'];
-            return this.attendanceService.update(id, updateAttendanceDto, userId);
+            return this.attendanceService.updatePunchOut(id, updateAttendanceDto, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

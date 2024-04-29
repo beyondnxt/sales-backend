@@ -5,6 +5,7 @@ import { Product } from './entity/product.entity';
 import { CreateProductDto } from './dto/product.dto';
 import { ConnectionPool } from 'mssql';
 import * as mysql from 'mysql';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class ProductService {
@@ -32,6 +33,15 @@ export class ProductService {
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME
     });
+  }
+
+  @Cron('0 0 9 * * *')
+  async handleProductUpdate() {
+    try {
+      await this.getProductData();
+    } catch (error) {
+      console.error('Error occurred during Product update:', error);
+    }
   }
 
   async executeQuery(query: string): Promise<any> {

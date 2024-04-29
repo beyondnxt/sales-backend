@@ -6,6 +6,7 @@ import { CreateAttendanceDto } from './dto/attendance.dto';
 import { User } from 'src/user/entity/user.entity';
 import { Company } from 'src/company/entity/company.entity';
 import { Role } from 'src/role/entity/role.entity';
+import { Cron } from '@nestjs/schedule';
 
 @Injectable()
 export class AttendanceService {
@@ -20,30 +21,44 @@ export class AttendanceService {
     private readonly roleRepository: Repository<Role>,
   ) { }
 
-  async create(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
+  @Cron('0 0 7 * * *')
+  async handleAttendanceUpdate() {
+    try {
+      const users = await this.userRepository.find();
+
+      for (const user of users) {
+        const attendance = this.attendanceRepository.create({
+        userId : user.id,
+        status : 'Absent'
+      })
+      await this.attendanceRepository.save(attendance);
+      }
+    } catch (error) {
+      console.error('Error occurred during attendance update:', error);
+    }
+  }
+
+  async updatePunchIn(id: number,createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId } })
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } })
-    const { latitude, longitude, ...rest } = createAttendanceDto;
+    const attendance = await this.findById(id);
+    const { latitude, longitude } = createAttendanceDto;
     const punchInLocation = `${latitude},${longitude}`;
 
-    // Calculate distance from office geolocation
     const { kilometers } = await this.calculateGeolocationDifference(
       company.location,
       latitude,
       longitude
     );
 
-    const punchInDistanceFromOffice = kilometers.toString();
-
-    const attendance = this.attendanceRepository.create({
-      ...rest,
-      punchInDistanceFromOffice,
-      punchInLocation: punchInLocation,
-      punchIn: new Date().toTimeString().slice(0, 8),
-      status: 'Present',
-      createdBy: userId,
-    });
-
+    attendance.punchInDistanceFromOffice = kilometers.toString();
+    attendance.punchIn = new Date().toTimeString().slice(0, 8);
+    attendance.punchInLocation = punchInLocation
+    attendance.status = 'Present'
+    if (!attendance) {
+      throw new NotFoundException(`Attendance with ID ${id} not found`);
+    }
+    Object.assign(attendance, createAttendanceDto);
     return await this.attendanceRepository.save(attendance);
   }
 
@@ -111,8 +126,6 @@ export class AttendanceService {
         punchInDistanceFromOffice: attendance.punchInDistanceFromOffice,
         punchOutDistanceFromOffice: attendance.punchOutDistanceFromOffice,
         status: attendance.status,
-        createdBy: attendance.createdBy,
-        createdOn: attendance.createdOn,
         updatedBy: attendance.updatedBy,
         updatedOn: attendance.updatedOn
       })),
@@ -129,7 +142,7 @@ export class AttendanceService {
     return attendance;
   }
 
-  async update(id: number, updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
+  async updatePunchOut(id: number, updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } });
     const attendance = await this.findById(id);
