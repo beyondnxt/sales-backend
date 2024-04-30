@@ -66,15 +66,15 @@ import { MapLog } from './map-log/entity/map-log.entity';
   ],
 })
 export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthenticationMiddleware).exclude(
-      { path: 'auth/signup', method: RequestMethod.POST },
-      { path: 'auth/signin', method: RequestMethod.POST },
-      { path: 'auth/forgotPassword', method: RequestMethod.PUT },
-      { path: 'auth/resetPasswordUsingId/:id', method: RequestMethod.PUT },
-      { path: 'auth/email/changePassword', method: RequestMethod.POST },
-      { path: 'products/getProductData', method: RequestMethod.GET }
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(AuthenticationMiddleware).exclude(
+  //     { path: 'auth/signup', method: RequestMethod.POST },
+  //     { path: 'auth/signin', method: RequestMethod.POST },
+  //     { path: 'auth/forgotPassword', method: RequestMethod.PUT },
+  //     { path: 'auth/resetPasswordUsingId/:id', method: RequestMethod.PUT },
+  //     { path: 'auth/email/changePassword', method: RequestMethod.POST },
+  //     { path: 'products/getProductData', method: RequestMethod.GET }
 
-    ).forRoutes('*');
-  }
+  //   ).forRoutes('*');
+  // }
 }

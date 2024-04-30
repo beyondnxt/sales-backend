@@ -13,19 +13,19 @@ export class Attendance {
     @JoinColumn({ name: 'userId' })
     user: User;
 
-    @Column()
+    @Column({ default: null })
     punchIn: string
 
-    @Column()
+    @Column({ default: null })
     punchOut: string
 
-    @Column()
+    @Column({ default: null })
     punchInLocation: string
 
-    @Column()
+    @Column({ default: null })
     punchOutLocation: string
 
-    @Column()
+    @Column({ default: null })
     punchInDistanceFromOffice: string
 
     @Column({ default: null })
