@@ -1,7 +1,7 @@
 import { User } from "src/user/entity/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
-@Entity({name: 'mapLog'})
+@Entity({name: 'maplog'})
 export class MapLog{
     @PrimaryGeneratedColumn()
     id: number

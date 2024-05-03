@@ -21,24 +21,24 @@ export class AttendanceService {
     private readonly roleRepository: Repository<Role>,
   ) { }
 
-  @Cron('0 48 22 * * *')
+  @Cron('0 16 11 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();
 
       for (const user of users) {
         const attendance = this.attendanceRepository.create({
-        userId : user.id,
-        status : 'Absent'
-      })
-      await this.attendanceRepository.save(attendance);
+          userId: user.id,
+          status: 'Absent'
+        })
+        await this.attendanceRepository.save(attendance);
       }
     } catch (error) {
       console.error('Error occurred during attendance update:', error);
     }
   }
 
-  async updatePunchIn(id: number,createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
+  async updatePunchIn(id: number, createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId } })
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } })
     const attendance = await this.findById(id);
@@ -131,6 +131,81 @@ export class AttendanceService {
         updatedOn: attendance.updatedOn
       })),
       fetchedCount: attendances.length,
+      total: totalCount
+    };
+  }
+
+  async findReport(page: number | "all" = 1,
+    limit: number = 10,
+    filters: {
+      startDate?: string,
+      userName?: string,
+    }
+  ): Promise<{ data: any[], fetchedCount: number, total: number }> {
+    const whereCondition: any = {};
+
+    let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
+      .leftJoinAndSelect('attendance.user', 'user')
+      .andWhere(whereCondition);
+
+    if (filters.startDate) {
+      const startDate = new Date(filters.startDate);
+      queryBuilder = queryBuilder.andWhere('MONTH(attendance.createdOn) = :startMonth', { startMonth: startDate.getMonth() + 1 });
+    }
+
+    if (filters.userName) {
+      queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.userName });
+    }
+
+    if (page !== "all") {
+      const skip = (page - 1) * limit;
+      queryBuilder = queryBuilder.skip(skip).take(limit);
+    }
+
+    const [attendances, totalCount] = await Promise.all([
+      queryBuilder.getMany(),
+      queryBuilder.getCount()
+    ]);
+
+    const aggregatedData: Map<number, { userName: string, totalPresent: number, totalAbsent: number, totalLatePunchIn: number, totalEarlyPunchout: number }> = new Map();
+    attendances.forEach(attendance => {
+      const userId = attendance.userId;
+      const userName = attendance.user.firstName;
+      if (!aggregatedData.has(userId)) {
+        aggregatedData.set(userId, { userName, totalPresent: 0, totalAbsent: 0, totalLatePunchIn: 0, totalEarlyPunchout: 0 });
+      }
+      if (attendance.status === 'Present') {
+        aggregatedData.get(userId).totalPresent++;
+      } else if (attendance.status === 'Absent') {
+        aggregatedData.get(userId).totalAbsent++;
+      }
+      if (attendance.punchIn && attendance.punchOut) {
+        const punchInTime = attendance.punchIn.split(":").map(Number)
+        const punchOutTime = attendance.punchOut.split(":").map(Number)
+        if (punchInTime[0] > parseInt(process.env.PUNCHIN_HOURS) || (punchInTime[0] === parseInt(process.env.PUNCHIN_HOURS) && punchInTime[1] > parseInt(process.env.PUNCHIN_MINUTES))) {
+          aggregatedData.get(userId).totalLatePunchIn++;
+        }
+        if (punchOutTime[0] < parseInt(process.env.PUNCHOUT_HOURS) || (punchOutTime[0] === parseInt(process.env.PUNCHOUT_HOURS) && punchOutTime[1] < parseInt(process.env.PUNCHOUT_MINUTES))) {
+          aggregatedData.get(userId).totalEarlyPunchout++;
+        }
+      }
+    });
+
+    const data: any[] = [];
+    for (const [userId, counts] of aggregatedData.entries()) {
+      data.push({
+        userId: userId,
+        userName: counts.userName,
+        totalPresent: counts.totalPresent,
+        totalAbsent: counts.totalAbsent,
+        totalLatePunchIn: counts.totalLatePunchIn,
+        totalEarlyPunchout: counts.totalEarlyPunchout
+      });
+    }
+
+    return {
+      data,
+      fetchedCount: data.length,
       total: totalCount
     };
   }

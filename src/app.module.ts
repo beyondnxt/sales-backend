@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,7 +8,6 @@ import { RoleModule } from './role/role.module';
 import { User } from './user/entity/user.entity';
 import { Role } from './role/entity/role.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthenticationMiddleware } from './common/middleware/authentication.middleware';
 import { RequestService } from './common/request.service';
 import { Attendance } from './attendence/entity/attendence.entity';
 import { AttendanceModule } from './attendence/attendance.module';
@@ -32,7 +31,7 @@ import { MapLog } from './map-log/entity/map-log.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
-    ScheduleModule.forRoot(),
+  ScheduleModule.forRoot(),
   TypeOrmModule.forRootAsync({
     imports: [ConfigModule],
     useFactory: (configService: ConfigService) => ({
@@ -42,8 +41,8 @@ import { MapLog } from './map-log/entity/map-log.entity';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, Task,MapLog],
-      synchronize: false,
+      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, Task, MapLog],
+      synchronize: true,
     }),
     inject: [ConfigService],
   }),

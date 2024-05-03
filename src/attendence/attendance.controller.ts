@@ -28,6 +28,18 @@ export class AttendanceController {
         }
     }
 
+    @Get('report')
+    findReport(@Query('page') page: number | "all" = 1, @Query('limit') limit: number,
+        @Query('startDate') startDate: string,
+        @Query('userName') userName: string
+    ): Promise<{ data: any[], fetchedCount: number, total: number }> {
+        try {
+            return this.attendanceService.findReport(page, limit, { startDate, userName });
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @Get(':id')
     findById(@Param('id') id: number) {
         try {
