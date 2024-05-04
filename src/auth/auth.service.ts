@@ -38,7 +38,7 @@ export class AuthService {
 
     async signIn(signInDto: userCreated): Promise<any> {
         const { email, password } = signInDto;
-        const user = await this.userRepository.findOne({ where: { email } })
+        const user = await this.userRepository.findOne({ where: { email }, relations: ['role'] })
         if (!user) {
             throw new UnauthorizedException('Invalid email');
         }

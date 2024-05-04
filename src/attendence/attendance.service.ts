@@ -21,7 +21,7 @@ export class AttendanceService {
     private readonly roleRepository: Repository<Role>,
   ) { }
 
-  @Cron('0 16 11 * * *')
+  @Cron('0 0 9 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();

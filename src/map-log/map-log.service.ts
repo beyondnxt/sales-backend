@@ -18,14 +18,65 @@ export class MapLogService {
     ) { }
 
     async createMapLog(mapLogData: CreateMapLogDto): Promise<MapLog> {
-        const { latitude, longitude, ...rest } = mapLogData;
+        const { latitude, longitude, userId } = mapLogData;
         const location = `${latitude},${longitude}`;
-        const MapLog = this.taskRepository.create({
-            ...rest,
+
+        const newMapLog = this.MapLogRepository.create({
+            userId,
             location
         });
-        return await this.MapLogRepository.save(MapLog);
+
+        return await this.MapLogRepository.save(newMapLog);
     }
+
+    // async findAll(userId: number, assignTo: number, page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
+
+    //     let queryBuilder = this.MapLogRepository.createQueryBuilder('mapLog')
+    //         .leftJoinAndSelect('mapLog.user', 'user')
+    //         .take(limit);
+
+    //     if (page !== "all") {
+    //         const skip = (page - 1) * limit;
+    //         queryBuilder = queryBuilder.skip(skip);
+    //     }
+
+    //     const [mapLogs, totalCount] = await Promise.all([
+    //         queryBuilder.getMany(),
+    //         queryBuilder.getCount(),
+    //     ]);
+
+    //     const attendances = await this.attendanceRepository.find({ where: { userId } });
+    //     const tasks = await this.taskRepository.find({ where: { assignTo } });
+
+    //     const data: any[] = mapLogs.map(mapLog => {
+    //         const userAttendance = attendances.find(attendance => attendance.userId == mapLog.userId);
+    //         const userTask = tasks.find(task => task.assignTo == mapLog.userId);
+
+    //         return {
+    //             userId: mapLog.userId,
+    //             userName: mapLog.user.firstName,
+    //             mapLog: mapLog ? [{ 
+    //                 ...this.formatCoordinates(mapLog.location),
+    //                 createdOn: mapLog.createdOn
+    //             }] : [],
+    //             attendance: userAttendance ? [{
+    //                 punchIn: this.formatCoordinates(userAttendance.punchInLocation),
+    //                 punchOut: this.formatCoordinates(userAttendance.punchOutLocation),
+    //                 createdOn: userAttendance.createdOn
+    //             }] : [],
+    //             task: userTask ? [{ 
+    //                 ...this.formatCoordinates(userTask.location),
+    //                 createdOn: userTask.createdOn
+    //             }] : [],
+
+    //         };
+    //     });
+    //     return {
+    //         data,
+    //         fetchedCount: data.length,
+    //         total: totalCount
+    //     };
+    // }
 
     async findAll(userId: number, assignTo: number, page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
 
@@ -43,23 +94,36 @@ export class MapLogService {
             queryBuilder.getCount(),
         ]);
 
-        const attendances = await this.attendanceRepository.find({ where: { userId } });
-        const tasks = await this.taskRepository.find({ where: { assignTo } });
+        const attendances = await this.attendanceRepository.find({ where: { userId }, relations: ['user'] });
+        const tasks = await this.taskRepository.find({ where: { assignTo }, relations: ['user'] });
 
         const data: any[] = mapLogs.map(mapLog => {
             const userAttendance = attendances.find(attendance => attendance.userId == mapLog.userId);
+            // console.log('userAttendance', userAttendance)
             const userTask = tasks.find(task => task.assignTo == mapLog.userId);
+            // console.log('userTask', userTask)
 
             return {
-                userId: mapLog.userId,
-                userName: mapLog.user.firstName,
-                mapLog: [mapLog ? this.formatCoordinates(mapLog.location) : null],
-                attendance: [{
-                    punchIn: userAttendance ? this.formatCoordinates(userAttendance.punchInLocation) : null,
-                    punchOut: userAttendance ? this.formatCoordinates(userAttendance.punchOutLocation) : null
-            }],
-                task: [userTask ? this.formatCoordinates(userTask.location) : null],
-                createdOn: mapLog.createdOn
+                mapLog: mapLog ? [{
+                    userId: mapLog.userId,
+                    userName: mapLog.user.firstName,
+                    ...this.formatCoordinates(mapLog.location),
+                    createdOn: mapLog.createdOn
+                }] : [],
+                attendance: userAttendance ? [{
+                    userId: userAttendance.userId,
+                    userName: userAttendance.user.firstName,
+                    punchIn: this.formatCoordinates(userAttendance.punchInLocation),
+                    punchOut: this.formatCoordinates(userAttendance.punchOutLocation),
+                    createdOn: userAttendance.createdOn
+                }] : [],
+                task: userTask ? [{
+                    userId: userTask.assignTo,
+                    userName: userTask.user.firstName,
+                    ...this.formatCoordinates(userTask.location),
+                    createdOn: userTask.createdOn
+                }] : [],
+
             };
         });
         return {
@@ -70,6 +134,9 @@ export class MapLogService {
     }
 
     formatCoordinates(location: any) {
+        if (!location) {
+            return null;
+        }
         const coordinates = location.split(',')
         return {
             latitude: coordinates[0],
