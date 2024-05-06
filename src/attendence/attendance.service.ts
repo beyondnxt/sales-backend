@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entity/attendence.entity';
 import { CreateAttendanceDto } from './dto/attendance.dto';
 import { User } from 'src/user/entity/user.entity';
@@ -21,7 +21,7 @@ export class AttendanceService {
     private readonly roleRepository: Repository<Role>,
   ) { }
 
-  @Cron('0 0 9 * * *')
+  @Cron('0 16 14 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();
@@ -38,17 +38,29 @@ export class AttendanceService {
     }
   }
 
-  async updatePunchIn(id: number, createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
+  async updatePunchIn(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId } })
+    if (!user) {
+      throw new NotFoundException(`User with ID ${userId} not found`);
+    }
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } })
-    const attendance = await this.findById(id);
+    if (!company) {
+      throw new NotFoundException(`Company for user ${userId} not found`);
+    }
+
+    const currentDate = new Date();
+    const attendance = await this.attendanceRepository.findOne({
+      where: {
+        userId,
+        createdOn: MoreThanOrEqual(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
+      }
+    });
     const { latitude, longitude } = createAttendanceDto;
     const punchInLocation = `${latitude},${longitude}`;
 
-    const { kilometers } = await this.calculateGeolocationDifference(
+    const kilometers = await this.calculateDistance(
       company.location,
-      latitude,
-      longitude
+      punchInLocation
     );
 
     attendance.punchInDistanceFromOffice = kilometers;
@@ -56,32 +68,55 @@ export class AttendanceService {
     attendance.punchInLocation = punchInLocation
     attendance.status = 'Present'
     if (!attendance) {
-      throw new NotFoundException(`Attendance with ID ${id} not found`);
+      throw new NotFoundException(`Attendance with ID ${userId} not found`);
     }
     Object.assign(attendance, createAttendanceDto);
     return await this.attendanceRepository.save(attendance);
   }
 
-  async calculateGeolocationDifference(branchLocation: string, punchInLatitude: number, punchInLongitude: number): Promise<{ kilometers: number; meters: number }> {
-    const [branchLatitude, branchLongitude] = branchLocation.substring(1, branchLocation.length - 1).split(',').map(parseFloat);
-    const R = 6371; // Radius of the earth in kilometers
-    const dLat = this.deg2rad(punchInLatitude - branchLatitude);
-    const dLon = this.deg2rad(punchInLongitude - branchLongitude);
+  async calculateDistance(companyLocation: string, punchInLocation: string): Promise<number> {
+    // Convert latitude and longitude strings to numbers
+    const [lat1, lon1] = companyLocation.split(',').map(parseFloat);
+    const [lat2, lon2] = punchInLocation.split(',').map(parseFloat);
+
+    const R = 6371;
+    const dLat = this.deg2rad(lat2 - lat1);
+    const dLon = this.deg2rad(lon2 - lon1);
+
     const a =
       Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(this.deg2rad(branchLatitude)) * Math.cos(this.deg2rad(punchInLatitude)) *
+      Math.cos(this.deg2rad(lat1)) * Math.cos(this.deg2rad(lat2)) *
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Distance in kilometers
-    console.log('distance', distance)
-    const distanceInMeters = distance * 1000; // Convert kilometers to meters
-    console.log('distanceInMeters', distanceInMeters)
-    return { kilometers: distance, meters: distanceInMeters };
+    const distance = R * c;
+    return distance;
   }
 
   private deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
+
+  // async calculateGeolocationDifference(location: string, punchInLatitude: number, punchInLongitude: number): Promise<{ kilometers: number; meters: number }> {
+  //   const [companyLatitude, comapnyLongitude] = location.substring(1, location.length - 1).split(',').map(parseFloat);
+  //   const R = 6371; // Radius of the earth in kilometers
+  //   const dLat = this.deg2rad(punchInLatitude - companyLatitude);
+  //   const dLon = this.deg2rad(punchInLongitude - comapnyLongitude);
+  //   const a =
+  //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+  //     Math.cos(this.deg2rad(companyLatitude)) * Math.cos(this.deg2rad(punchInLatitude)) *
+  //     Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  //   const distance = R * c; // Distance in kilometers
+  //   console.log('distance', distance)
+  //   const distanceInMeters = distance * 1000; // Convert kilometers to meters
+  //   console.log('distanceInMeters', distanceInMeters)
+  //   return { kilometers: distance, meters: distanceInMeters };
+  // }
+
+  // private deg2rad(deg: number): number {
+  //   return deg * (Math.PI / 180);
+  // }
 
   async findAll(page: number | "all" = 1,
     limit: number = 10,
@@ -219,24 +254,29 @@ export class AttendanceService {
     return attendance;
   }
 
-  async updatePunchOut(id: number, updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
+  async updatePunchOut(updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } });
-    const attendance = await this.findById(id);
+    const currentDate = new Date();
+    const attendance = await this.attendanceRepository.findOne({
+      where: {
+        userId,
+        createdOn: MoreThanOrEqual(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
+      }
+    });
     const { latitude, longitude } = updateAttendanceDto;
     const punchOutLocation = `${latitude},${longitude}`;
 
-    const { kilometers } = await this.calculateGeolocationDifference(
+    const kilometers = await this.calculateDistance(
       company.location,
-      latitude,
-      longitude
+      punchOutLocation
     );
     attendance.punchOutDistanceFromOffice = kilometers;
     attendance.punchOut = new Date().toTimeString().slice(0, 8);
     attendance.punchOutLocation = punchOutLocation
     attendance.updatedBy = userId;
     if (!attendance) {
-      throw new NotFoundException(`Attendance with ID ${id} not found`);
+      throw new NotFoundException(`Attendance with ID ${userId} not found`);
     }
     Object.assign(attendance, updateAttendanceDto);
     return await this.attendanceRepository.save(attendance);
@@ -267,7 +307,6 @@ export class AttendanceService {
     }
   }
 
-
   async delete(id: number): Promise<{ message: string }> {
     const attendance = await this.attendanceRepository.delete(id);
     if (!attendance) {
@@ -275,4 +314,5 @@ export class AttendanceService {
     }
     return { message: `Successfully deleted id ${id}` };
   }
+
 }

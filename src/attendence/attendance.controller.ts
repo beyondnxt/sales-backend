@@ -7,10 +7,11 @@ import { Attendance } from './entity/attendence.entity';
 export class AttendanceController {
     constructor(private readonly attendanceService: AttendanceService) { }
 
-    @Put('updatePunchIn/:id')
-    updatePunchIn(@Param('id') id: number,@Body() createAttendanceDto: CreateAttendanceDto, userId: number) {
+    @Put('updatePunchIn/:userId')
+    updatePunchIn(@Param('userId') userId: number, @Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
-            return this.attendanceService.updatePunchIn(id,createAttendanceDto, userId);
+            const userId = req.headers['userid'];
+            return this.attendanceService.updatePunchIn(createAttendanceDto, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -59,11 +60,11 @@ export class AttendanceController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    @Put('updatePunchOut/:id')
-    updatePunchOut(@Param('id') id: number, @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    @Put('updatePunchOut/:userid')
+    updatePunchOut(@Param('userId') userId: number, @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
             const userId = req.headers['userid'];
-            return this.attendanceService.updatePunchOut(id, updateAttendanceDto, userId);
+            return this.attendanceService.updatePunchOut(updateAttendanceDto, userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
