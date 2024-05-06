@@ -2,37 +2,23 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MapLog } from './entity/map-log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Attendance } from 'src/attendence/entity/attendence.entity';
-import { Task } from 'src/task/entity/task.entity';
 import { CreateMapLogDto } from './dto/map-log.dto';
 
 @Injectable()
 export class MapLogService {
     constructor(
         @InjectRepository(MapLog)
-        private readonly MapLogRepository: Repository<MapLog>,
-        @InjectRepository(Attendance)
-        private readonly attendanceRepository: Repository<Attendance>,
-        @InjectRepository(Task)
-        private readonly taskRepository: Repository<Task>,
+        private readonly mapLogRepository: Repository<MapLog>
     ) { }
 
     async createMapLog(mapLogData: CreateMapLogDto): Promise<MapLog> {
-        const { latitude, longitude, userId } = mapLogData;
-        const location = `${latitude},${longitude}`;
-
-        const newMapLog = this.MapLogRepository.create({
-            userId,
-            location
-        });
-
-        return await this.MapLogRepository.save(newMapLog);
+        const newMapLog = this.mapLogRepository.create(mapLogData)
+        return await this.mapLogRepository.save(newMapLog);
     }
 
-    async findAll(userId: number, assignTo: number, page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
+    async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
 
-        let queryBuilder = this.MapLogRepository.createQueryBuilder('mapLog')
-            .leftJoinAndSelect('mapLog.user', 'user')
+        let queryBuilder = this.mapLogRepository.createQueryBuilder('mapLog')
             .take(limit);
 
         if (page !== "all") {
@@ -44,74 +30,36 @@ export class MapLogService {
             queryBuilder.getMany(),
             queryBuilder.getCount(),
         ]);
-
-        const attendances = await this.attendanceRepository.find({ where: { userId } });
-        const tasks = await this.taskRepository.find({ where: { assignTo } });
-
-        const data: any[] = mapLogs.map(mapLog => {
-            const userAttendance = attendances.find(attendance => attendance.userId == mapLog.userId);
-            const userTask = tasks.find(task => task.assignTo == mapLog.userId);
-
-            return {
-                userId: mapLog.userId,
-                userName: mapLog.user.firstName,
-                mapLog: mapLog ? [{ 
-                    ...this.formatCoordinates(mapLog.location),
-                    createdOn: mapLog.createdOn
-                }] : [],
-                attendance: userAttendance ? [{
-                    punchIn: this.formatCoordinates(userAttendance.punchInLocation),
-                    punchOut: this.formatCoordinates(userAttendance.punchOutLocation),
-                    createdOn: userAttendance.createdOn
-                }] : [],
-                task: userTask ? [{ 
-                    ...this.formatCoordinates(userTask.location),
-                    createdOn: userTask.createdOn
-                }] : [],
-
-            };
-        });
         return {
-            data,
-            fetchedCount: data.length,
+            data: mapLogs,
+            fetchedCount: mapLogs.length,
             total: totalCount
         };
     }
 
-    formatCoordinates(location: any) {
-        if (!location) {
-            return null;
-        }
-        const coordinates = location.split(',')
-        return {
-            latitude: coordinates[0],
-            longitude: coordinates[1]
-        }
-    }
-
     async findMapLogById(id: number): Promise<MapLog> {
-        return await this.MapLogRepository.findOne({ where: { id } });
+        return await this.mapLogRepository.findOne({ where: { id } });
     }
 
     async update(id: number, mapLogData: MapLog): Promise<MapLog> {
         try {
-            const MapLog = await this.MapLogRepository.findOne({ where: { id } });
+            const MapLog = await this.mapLogRepository.findOne({ where: { id } });
             if (!MapLog) {
                 throw new NotFoundException(`MapLog  with ID ${id} not found`);
             }
-            this.MapLogRepository.merge(MapLog, mapLogData);
-            return await this.MapLogRepository.save(MapLog);
+            this.mapLogRepository.merge(MapLog, mapLogData);
+            return await this.mapLogRepository.save(MapLog);
         } catch (error) {
             throw new Error(`Unable to update MapLog  : ${error.message}`);
         }
     }
 
     async remove(id: number): Promise<any> {
-        const MapLog = await this.MapLogRepository.findOne({ where: { id } });
+        const MapLog = await this.mapLogRepository.findOne({ where: { id } });
         if (!MapLog) {
             throw new NotFoundException('MapLog request not found');
         }
-        await this.MapLogRepository.remove(MapLog);
+        await this.mapLogRepository.remove(MapLog);
         return { message: `Successfully deleted id ${id}` }
     }
 }

@@ -17,11 +17,10 @@ export class MapLogController {
     }
 
     @Get()
-    findAll(@Query('userId')userId: number,@Query('assignTo')assignTo: number,page: number | "all" = 1,
-    limit: number = 10
-  ): Promise<{ data: any[], fetchedCount: number, total: number }>{
+    findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number = 10
+    ): Promise<{ data: any[], fetchedCount: number, total: number }> {
         try {
-            return this.mapLogService.findAll(userId,assignTo,page, limit);
+            return this.mapLogService.findAll(page, limit);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -1,7 +1,5 @@
 export class CreateMapLogDto{
     userId: number
-    location: string
+    location: { [key: string]: any }
     createdOn: Date
-    latitude: string
-    longitude: string
 }

@@ -7,6 +7,12 @@ import { Attendance } from './entity/attendence.entity';
 export class AttendanceController {
     constructor(private readonly attendanceService: AttendanceService) { }
 
+    @Get('last')
+    async getLastAttendance(@Req() req: Request): Promise<Attendance> {
+        const userId = req.headers['userid'];
+        return this.attendanceService.getLastAttendanceByUserId(userId);
+    }
+
     @Put('updatePunchIn/:userId')
     updatePunchIn(@Param('userId') userId: number, @Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {

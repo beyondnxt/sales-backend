@@ -7,6 +7,8 @@ import { User } from 'src/user/entity/user.entity';
 import { Company } from 'src/company/entity/company.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Cron } from '@nestjs/schedule';
+import { Task } from 'src/task/entity/task.entity';
+import { MapLog } from 'src/map-log/entity/map-log.entity';
 
 @Injectable()
 export class AttendanceService {
@@ -19,6 +21,10 @@ export class AttendanceService {
     private readonly companyRepository: Repository<Company>,
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
+    @InjectRepository(Task)
+    private readonly taskRepository: Repository<Task>,
+    @InjectRepository(MapLog)
+    private readonly mapLogRepository: Repository<MapLog>,
   ) { }
 
   @Cron('0 16 14 * * *')
@@ -246,12 +252,63 @@ export class AttendanceService {
     };
   }
 
-  async findById(id: number): Promise<Attendance | undefined> {
+  async getLastAttendanceByUserId(userId: number): Promise<Attendance> {
+    return this.attendanceRepository.createQueryBuilder('attendance')
+      .where('attendance.userId = :userId', { userId })
+      .orderBy('attendance.updatedOn', 'DESC')
+      .getOne();
+  }
+
+  async findById(id: number): Promise<any> {
     const attendance = await this.attendanceRepository.findOne({ where: { id } });
+
     if (!attendance) {
-      throw new NotFoundException(`Attendance with ID ${id} not found`);
+      return (`Attendance with ID ${id} not found`);
     }
-    return attendance;
+    const attendanceDate = new Date(attendance.createdOn.toISOString().split('T')[0]);
+    const usermap = await this.mapLogRepository.findOne({
+      where: {
+        userId: attendance.userId,
+        createdOn: attendanceDate
+      }
+    });
+    const userTask = await this.taskRepository.findOne({
+      where: {
+        assignTo: attendance.userId,
+        createdOn: attendanceDate
+      }
+    });
+    return {
+      data: {
+        userId: attendance.userId,
+        attendance: {
+          punchIn: this.formatCoordinates(attendance.punchInLocation),
+          punchOut: this.formatCoordinates(attendance.punchOutLocation),
+          createdOn: attendance.createdOn
+        },
+        mapLog: usermap ? [{
+          userId: usermap.userId,
+          location: usermap.location,
+          createdOn: usermap.createdOn
+        }] : [],
+        task: userTask ? [{
+          userId: userTask.assignTo,
+          location: this.formatCoordinates(userTask.location),
+          createdOn: userTask.createdOn
+        }] : [],
+      }
+    };
+  }
+
+  formatCoordinates(location: string): { latitude: number, longitude: number } | null {
+    if (!location) {
+      return null;
+    }
+    const coordinates = location.split(',');
+    return {
+      latitude: parseFloat(coordinates[0]),
+      longitude: parseFloat(coordinates[1])
+    };
   }
 
   async updatePunchOut(updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
