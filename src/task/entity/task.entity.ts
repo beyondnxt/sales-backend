@@ -30,7 +30,7 @@ export class Task {
     @Column()
     status: string
 
-    @Column({ type: 'simple-json' })
+    @Column({ type: 'simple-json', default: null })
     feedBack: { [key: string]: any };
 
     @Column()

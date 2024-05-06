@@ -86,7 +86,7 @@ export class TaskService {
                 assignToName: task.user ? task.user.firstName : null,
                 description: task.description,
                 status: task.status,
-                feedBack: task.feedBack,
+                feedBack: task.feedBack ? task.feedBack : null,
                 location: task.location,
                 followUpDate: task.followUpDate,
                 createdOn: task.createdOn,

@@ -25,11 +25,11 @@ export class Attendance {
     @Column({ default: null })
     punchOutLocation: string
 
-    @Column({ default: null })
-    punchInDistanceFromOffice: string
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    punchInDistanceFromOffice: number
 
-    @Column({ default: null })
-    punchOutDistanceFromOffice: string
+    @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+    punchOutDistanceFromOffice: number
 
     @Column()
     status: string

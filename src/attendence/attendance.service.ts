@@ -51,7 +51,7 @@ export class AttendanceService {
       longitude
     );
 
-    attendance.punchInDistanceFromOffice = kilometers.toString();
+    attendance.punchInDistanceFromOffice = kilometers;
     attendance.punchIn = new Date().toTimeString().slice(0, 8);
     attendance.punchInLocation = punchInLocation
     attendance.status = 'Present'
@@ -73,8 +73,9 @@ export class AttendanceService {
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     const distance = R * c; // Distance in kilometers
+    console.log('distance', distance)
     const distanceInMeters = distance * 1000; // Convert kilometers to meters
-
+    console.log('distanceInMeters', distanceInMeters)
     return { kilometers: distance, meters: distanceInMeters };
   }
 
@@ -230,7 +231,7 @@ export class AttendanceService {
       latitude,
       longitude
     );
-    attendance.punchOutDistanceFromOffice = kilometers.toString();
+    attendance.punchOutDistanceFromOffice = kilometers;
     attendance.punchOut = new Date().toTimeString().slice(0, 8);
     attendance.punchOutLocation = punchOutLocation
     attendance.updatedBy = userId;
