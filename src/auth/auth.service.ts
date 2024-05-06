@@ -50,7 +50,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid password');
         }
         const token = this.jwtService.sign({ id: user.id });
-        const userData = { userId: user.id, userName: user.firstName, roleId: user.roleId, token: token }
+        const userData = { userId: user.id, userName: user.firstName, roleId: user.roleId, roleName: user.role.name, token: token }
         return userData;
     }
 
