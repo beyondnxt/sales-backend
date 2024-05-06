@@ -15,7 +15,7 @@ export class UserController {
   }
 
   @Get()
-  async getUsersWithRole(@Query('page') page: number, @Query('limit') limit: number, @Query('firstName') firstName: string,
+  async getUsersWithRole(@Query('page')page: number | "all" = 1, @Query('limit') limit: number, @Query('firstName') firstName: string,
     @Query('lastName') lastName: string): Promise<{ data: any[], total: number }> {
     try {
       return await this.userService.getUsersWithRoles(page, limit, firstName, lastName)

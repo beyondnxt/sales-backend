@@ -4,7 +4,7 @@ export class CreateTaskDto {
     assignTo: number
     description: string
     status: string
-    feedBack: string
+    feedBack: { [key: string]: any };
     location: string
     followUpDate: Date
     latitude: number

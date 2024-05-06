@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Like, Repository } from 'typeorm';
 import { Role } from './entity/role.entity';
 import { CreateRoleDto } from './dto/role.dto';
 
@@ -20,17 +20,30 @@ export class RoleService {
     }
   }
 
-  async getAllRoles(page: number = 1, limit: number = 10): Promise<{ roles: Role[]; total: number }> {
-    try {
-      const [roles, total] = await this.roleRepository.findAndCount({
-        take: limit,
-        skip: (page - 1) * limit,
-      });
-      return { roles, total };
-    } catch (error) {
-      throw new Error(`Unable to fetch roles: ${error.message}`);
+  async getAllRoles(page: number | "all" = 1, limit: number = 10, name: string): Promise<{ data: Role[], fetchedCount: number, totalCount: number }> {
+    const where: any = {};
+    if (name) {
+      where.name = Like(`%${name}%`);
     }
+    let queryBuilder = this.roleRepository.createQueryBuilder('role')
+      .andWhere(where);
+
+    if (page !== "all") {
+      const skip = (page - 1) * limit;
+      queryBuilder = queryBuilder.skip(skip).take(limit);
+    }
+
+    const [role, totalCount] = await Promise.all([
+      queryBuilder.getMany(),
+      queryBuilder.getCount()
+    ]);
+    return {
+      data: role,
+      fetchedCount: role.length,
+      totalCount: totalCount
+    };
   }
+
 
   async getRoleById(id: number): Promise<Role> {
     try {

@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Repository } from "typeorm";
+import { Like, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 
 @Injectable()
@@ -14,29 +14,34 @@ export class UserService {
         return user;
     }
 
-    async getUsersWithRoles(page: number = 1, limit: number = 10, firstName?: string, lastName?: string): Promise<{ data: any[], total: number }> {
-        const skip = (page - 1) * limit;
-
-        let query = this.userRepository.createQueryBuilder('user')
-            .leftJoinAndSelect('user.role', 'role')
-            .leftJoinAndSelect('user.company', 'company')
-            .skip(skip)
-            .take(limit);
-
+    async getUsersWithRoles(page: number | "all" = 1, limit: number = 10, firstName?: string, lastName?: string): Promise<{ data: any[], total: number }> {
+        const where: any = {};
         if (firstName) {
-            query = query.andWhere('user.firstName = :firstName', { firstName });
+            where.firstName = Like(`%${firstName}%`);
         }
 
         if (lastName) {
-            query = query.andWhere('user.lastName = :lastName', { lastName });
+            where.lastName = Like(`%${lastName}%`);
         }
 
-        const usersWithRoles = await query.getMany();
+        let queryBuilder = this.userRepository.createQueryBuilder('user')
+            .leftJoinAndSelect('user.role', 'role')
+            .leftJoinAndSelect('user.company', 'company')
+            .take(limit)
+            .andWhere(where);
 
-        const totalCount = await this.userRepository.createQueryBuilder('user').getCount();
+        if (page !== "all") {
+            const skip = (page - 1) * limit;
+            queryBuilder = queryBuilder.skip(skip);
+        }
+
+        const [users, totalCount] = await Promise.all([
+            queryBuilder.getMany(),
+            queryBuilder.getCount()
+        ]);
 
         return {
-            data: usersWithRoles.map(user => ({
+            data: users.map(user => ({
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
@@ -52,6 +57,7 @@ export class UserService {
             total: totalCount
         };
     }
+
 
     async getUsers(page: number = 1, limit: number = 10): Promise<{ data: User[]; total: number }> {
         try {
