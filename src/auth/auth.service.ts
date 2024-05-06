@@ -40,14 +40,14 @@ export class AuthService {
         const { email, password } = signInDto;
         const user = await this.userRepository.findOne({ where: { email }, relations: ['role'] })
         if (!user) {
-            throw new UnauthorizedException('Invalid email');
+            return { message: 'Invalid email or password' };
         }
         if (user.status !== true) {
-            throw new UnauthorizedException('User is not active');
+            return { message: 'User is not active' };
         }
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
-            throw new UnauthorizedException('Invalid password');
+            return { message: 'Invalid email or password' };
         }
         const token = this.jwtService.sign({ id: user.id });
         const userData = { userId: user.id, userName: user.firstName, roleId: user.roleId, roleName: user.role.name, token: token }

@@ -29,55 +29,6 @@ export class MapLogService {
         return await this.MapLogRepository.save(newMapLog);
     }
 
-    // async findAll(userId: number, assignTo: number, page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
-
-    //     let queryBuilder = this.MapLogRepository.createQueryBuilder('mapLog')
-    //         .leftJoinAndSelect('mapLog.user', 'user')
-    //         .take(limit);
-
-    //     if (page !== "all") {
-    //         const skip = (page - 1) * limit;
-    //         queryBuilder = queryBuilder.skip(skip);
-    //     }
-
-    //     const [mapLogs, totalCount] = await Promise.all([
-    //         queryBuilder.getMany(),
-    //         queryBuilder.getCount(),
-    //     ]);
-
-    //     const attendances = await this.attendanceRepository.find({ where: { userId } });
-    //     const tasks = await this.taskRepository.find({ where: { assignTo } });
-
-    //     const data: any[] = mapLogs.map(mapLog => {
-    //         const userAttendance = attendances.find(attendance => attendance.userId == mapLog.userId);
-    //         const userTask = tasks.find(task => task.assignTo == mapLog.userId);
-
-    //         return {
-    //             userId: mapLog.userId,
-    //             userName: mapLog.user.firstName,
-    //             mapLog: mapLog ? [{ 
-    //                 ...this.formatCoordinates(mapLog.location),
-    //                 createdOn: mapLog.createdOn
-    //             }] : [],
-    //             attendance: userAttendance ? [{
-    //                 punchIn: this.formatCoordinates(userAttendance.punchInLocation),
-    //                 punchOut: this.formatCoordinates(userAttendance.punchOutLocation),
-    //                 createdOn: userAttendance.createdOn
-    //             }] : [],
-    //             task: userTask ? [{ 
-    //                 ...this.formatCoordinates(userTask.location),
-    //                 createdOn: userTask.createdOn
-    //             }] : [],
-
-    //         };
-    //     });
-    //     return {
-    //         data,
-    //         fetchedCount: data.length,
-    //         total: totalCount
-    //     };
-    // }
-
     async findAll(userId: number, assignTo: number, page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
 
         let queryBuilder = this.MapLogRepository.createQueryBuilder('mapLog')
@@ -94,32 +45,26 @@ export class MapLogService {
             queryBuilder.getCount(),
         ]);
 
-        const attendances = await this.attendanceRepository.find({ where: { userId }, relations: ['user'] });
-        const tasks = await this.taskRepository.find({ where: { assignTo }, relations: ['user'] });
+        const attendances = await this.attendanceRepository.find({ where: { userId } });
+        const tasks = await this.taskRepository.find({ where: { assignTo } });
 
         const data: any[] = mapLogs.map(mapLog => {
             const userAttendance = attendances.find(attendance => attendance.userId == mapLog.userId);
-            // console.log('userAttendance', userAttendance)
             const userTask = tasks.find(task => task.assignTo == mapLog.userId);
-            // console.log('userTask', userTask)
 
             return {
-                mapLog: mapLog ? [{
-                    userId: mapLog.userId,
-                    userName: mapLog.user.firstName,
+                userId: mapLog.userId,
+                userName: mapLog.user.firstName,
+                mapLog: mapLog ? [{ 
                     ...this.formatCoordinates(mapLog.location),
                     createdOn: mapLog.createdOn
                 }] : [],
                 attendance: userAttendance ? [{
-                    userId: userAttendance.userId,
-                    userName: userAttendance.user.firstName,
                     punchIn: this.formatCoordinates(userAttendance.punchInLocation),
                     punchOut: this.formatCoordinates(userAttendance.punchOutLocation),
                     createdOn: userAttendance.createdOn
                 }] : [],
-                task: userTask ? [{
-                    userId: userTask.assignTo,
-                    userName: userTask.user.firstName,
+                task: userTask ? [{ 
                     ...this.formatCoordinates(userTask.location),
                     createdOn: userTask.createdOn
                 }] : [],
