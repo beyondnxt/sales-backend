@@ -38,7 +38,8 @@ export class TaskService {
     async findAll(page: number | "all" = 1, limit: number = 10,
         filters: {
             taskType: string, status: string
-            startDate: Date, assignToName: string, customerName: string
+            startDate: Date, assignToName: string, customerName: string,
+            userName: string
         }): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
@@ -60,6 +61,12 @@ export class TaskService {
             queryBuilder = queryBuilder.andWhere('DATE(task.createdOn) = :startDate', { startDate });
         }
 
+        if (filters.userName) {
+            const userNames = filters.userName.split(',');
+            const regexPattern = userNames.join('|');
+            queryBuilder = queryBuilder.andWhere(`JSON_EXTRACT(task.createdBy, '$.userName') REGEXP :regexPattern`, { regexPattern });
+        }
+
         if (filters.assignToName) {
             queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.assignToName });
         }
@@ -73,9 +80,10 @@ export class TaskService {
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
 
-        const taskData = await queryBuilder.getMany();
-        const totalCount = await this.taskRepository.count();
-
+        const [taskData, totalCount] = await Promise.all([
+            queryBuilder.getMany(),
+            queryBuilder.getCount()
+        ]);
         return {
             data: taskData.map(task => ({
                 id: task.id,
@@ -140,7 +148,7 @@ export class TaskService {
                     throw new NotFoundException(`No tasks found with the provided IDs`);
                 }
                 const updatedTasks = tasks.map(task => {
-                    task.status = 'verify';
+                    task.status = 'verified';
                     task.updatedBy = userId;
                     return task;
                 });

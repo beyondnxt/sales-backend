@@ -266,16 +266,18 @@ export class AttendanceService {
       return (`Attendance with ID ${id} not found`);
     }
     const attendanceDate = new Date(attendance.createdOn.toISOString().split('T')[0]);
+    const formattedDate = attendanceDate.toISOString().split('T')[0];
     const usermap = await this.mapLogRepository.findOne({
       where: {
         userId: attendance.userId,
-        createdOn: attendanceDate
+        createdOn: new Date(formattedDate)
       }
     });
-    const userTask = await this.taskRepository.findOne({
+    console.log('usermap', usermap)
+    const userTask: any = await this.taskRepository.findOne({
       where: {
         assignTo: attendance.userId,
-        createdOn: attendanceDate
+        createdOn: new Date(formattedDate)
       }
     });
     return {

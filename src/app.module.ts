@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -28,7 +28,6 @@ import { Task } from './task/entity/task.entity';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MapLogModule } from './map-log/map-log.module';
 import { MapLog } from './map-log/entity/map-log.entity';
-import { AuthenticationMiddleware } from './common/middleware/authentication.middleware';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -66,15 +65,15 @@ import { AuthenticationMiddleware } from './common/middleware/authentication.mid
   ],
 })
 export class AppModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthenticationMiddleware).exclude(
-      { path: 'auth/signup', method: RequestMethod.POST },
-      { path: 'auth/signin', method: RequestMethod.POST },
-      { path: 'auth/forgotPassword', method: RequestMethod.PUT },
-      { path: 'auth/resetPasswordUsingId/:id', method: RequestMethod.PUT },
-      { path: 'auth/email/changePassword', method: RequestMethod.POST },
-      { path: 'products/getProductData', method: RequestMethod.GET }
+  // configure(consumer: MiddlewareConsumer) {
+  //   consumer.apply(AuthenticationMiddleware).exclude(
+  //     { path: 'auth/signup', method: RequestMethod.POST },
+  //     { path: 'auth/signin', method: RequestMethod.POST },
+  //     { path: 'auth/forgotPassword', method: RequestMethod.PUT },
+  //     { path: 'auth/resetPasswordUsingId/:id', method: RequestMethod.PUT },
+  //     { path: 'auth/email/changePassword', method: RequestMethod.POST },
+  //     { path: 'products/getProductData', method: RequestMethod.GET }
 
-    ).forRoutes('*');
-  }
+  //   ).forRoutes('*');
+  // }
 }
