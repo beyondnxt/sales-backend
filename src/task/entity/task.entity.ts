@@ -36,7 +36,7 @@ export class Task {
     @Column()
     location: string
 
-    @Column({ default: null})
+    @Column({ default: null })
     followUpDate: Date
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
@@ -48,6 +48,6 @@ export class Task {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedOn: Date;
 
-    @Column()
+    @Column({ default: null })
     updatedBy: number
 }

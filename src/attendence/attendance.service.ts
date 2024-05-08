@@ -27,7 +27,7 @@ export class AttendanceService {
     private readonly mapLogRepository: Repository<MapLog>,
   ) { }
 
-  @Cron('0 16 14 * * *')
+  @Cron('0 0 6 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();
@@ -267,19 +267,16 @@ export class AttendanceService {
     }
     const attendanceDate = new Date(attendance.createdOn.toISOString().split('T')[0]);
     const formattedDate = attendanceDate.toISOString().split('T')[0];
-    const usermap = await this.mapLogRepository.findOne({
-      where: {
-        userId: attendance.userId,
-        createdOn: new Date(formattedDate)
-      }
-    });
-    console.log('usermap', usermap)
-    const userTask: any = await this.taskRepository.findOne({
-      where: {
-        assignTo: attendance.userId,
-        createdOn: new Date(formattedDate)
-      }
-    });
+
+    const usermap = await this.mapLogRepository.createQueryBuilder('mapLog')
+      .where('mapLog.userId = :userId', { userId: attendance.userId })
+      .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
+      .getOne();
+
+    const userTask: any = await this.taskRepository.createQueryBuilder('task')
+      .where('task.assignTo = :userId', { userId: attendance.userId })
+      .andWhere('DATE(task.createdOn) = :date', { date: formattedDate })
+      .getMany();
     return {
       data: {
         userId: attendance.userId,
@@ -293,11 +290,11 @@ export class AttendanceService {
           location: usermap.location,
           createdOn: usermap.createdOn
         }] : [],
-        task: userTask ? [{
-          userId: userTask.assignTo,
-          location: this.formatCoordinates(userTask.location),
-          createdOn: userTask.createdOn
-        }] : [],
+        task: userTask.map(task => ({
+          userId: task.assignTo,
+          location: this.formatCoordinates(task.location),
+          createdOn: task.createdOn
+        })),
       }
     };
   }

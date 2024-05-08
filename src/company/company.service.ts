@@ -23,12 +23,12 @@ export class CompanyService {
         return await this.companyRepository.save(company);
     }
     
-    async findAll(page: number = 1, limit: number = 10): Promise<{ company: Company[], totalCount: number }> {
-        const [company, totalCount] = await this.companyRepository.findAndCount({
+    async findAll(page: number = 1, limit: number = 10): Promise<{ data: Company[], totalCount: number }> {
+        const [data, totalCount] = await this.companyRepository.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
         });
-        return { company, totalCount };
+        return { data, totalCount };
     }
 
     async findOne(id: number): Promise<Company> {

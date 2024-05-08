@@ -11,38 +11,38 @@ export class Customer {
     @Column()
     name: string
 
-    @Column()
+    @Column({ default: null })
     contactPerson: string
 
-    @Column()
+    @Column({ default: null })
     address: string
 
-    @Column()
+    @Column({ default: null })
     pinCode: string
 
-    @Column()
+    @Column({ default: null })
     country: string
 
-    @Column()
+    @Column({ default: null })
     state: string
 
-    @Column()
+    @Column({ default: null })
     city: string
 
-    @Column()
+    @Column({ default: null })
     area: string
 
-    @Column()
+    @Column({ default: null })
     @IsEmail()
     email: string;
 
-    @Column()
+    @Column({ default: null })
     contactNo: string;
 
-    @Column()
+    @Column({ default: null })
     latitude: number
 
-    @Column()
+    @Column({ default: null })
     longitude: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

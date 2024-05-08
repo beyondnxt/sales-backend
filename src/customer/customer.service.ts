@@ -17,12 +17,12 @@ export class CustomerService {
         return await this.customerRepository.save(customer);
     }
 
-    async findAll(page: number = 1, limit: number = 10): Promise<{ customers: Customer[], totalCount: number }> {
-        const [customers, totalCount] = await this.customerRepository.findAndCount({
+    async findAll(page: number = 1, limit: number = 10): Promise<{ data: Customer[], totalCount: number }> {
+        const [data, totalCount] = await this.customerRepository.findAndCount({
             skip: (page - 1) * limit,
             take: limit,
         });
-        return { customers, totalCount };
+        return { data, totalCount };
     }
 
     async findOne(id: number): Promise<Customer> {
