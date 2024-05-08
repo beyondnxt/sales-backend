@@ -27,7 +27,7 @@ export class AttendanceService {
     private readonly mapLogRepository: Repository<MapLog>,
   ) { }
 
-  @Cron('0 0 6 * * *')
+  @Cron('0 45 12 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();
@@ -69,7 +69,7 @@ export class AttendanceService {
       punchInLocation
     );
 
-    attendance.punchInDistanceFromOffice = kilometers;
+    attendance.punchInDistanceFromOffice = kilometers.toString();
     attendance.punchIn = new Date().toTimeString().slice(0, 8);
     attendance.punchInLocation = punchInLocation
     attendance.status = 'Present'
@@ -85,7 +85,7 @@ export class AttendanceService {
     const [lat1, lon1] = companyLocation.split(',').map(parseFloat);
     const [lat2, lon2] = punchInLocation.split(',').map(parseFloat);
 
-    const R = 6371;
+    const R = 6371; // Earth's radius in kilometers
     const dLat = this.deg2rad(lat2 - lat1);
     const dLon = this.deg2rad(lon2 - lon1);
 
@@ -95,9 +95,12 @@ export class AttendanceService {
       Math.sin(dLon / 2) * Math.sin(dLon / 2);
 
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c;
+    const distance = R * c; // Distance in kilometers
+
+    console.log('distance', distance);
     return distance;
   }
+
 
   private deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
@@ -327,7 +330,7 @@ export class AttendanceService {
       company.location,
       punchOutLocation
     );
-    attendance.punchOutDistanceFromOffice = kilometers;
+    attendance.punchOutDistanceFromOffice = kilometers.toString();
     attendance.punchOut = new Date().toTimeString().slice(0, 8);
     attendance.punchOutLocation = punchOutLocation
     attendance.updatedBy = userId;
