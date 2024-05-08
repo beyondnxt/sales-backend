@@ -72,8 +72,8 @@ export class TaskService {
         }
 
         if (filters.customerName) {
-            queryBuilder = queryBuilder.andWhere('customer.name ILIKE :name', { name: `%${filters.customerName}%` });
-        }        
+            queryBuilder = queryBuilder.andWhere('customer.name LIKE :name', { name: `%${filters.customerName}%` });
+        }               
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
