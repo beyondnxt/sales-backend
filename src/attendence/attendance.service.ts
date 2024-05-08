@@ -69,7 +69,7 @@ export class AttendanceService {
       punchInLocation
     );
 
-    attendance.punchInDistanceFromOffice = kilometers.toFixed(2);
+    attendance.punchInDistanceFromOffice = kilometers;
     attendance.punchIn = new Date().toTimeString().slice(0, 8);
     attendance.punchInLocation = punchInLocation
     attendance.status = 'Present'
@@ -327,7 +327,8 @@ export class AttendanceService {
       company.location,
       punchOutLocation
     );
-    attendance.punchOutDistanceFromOffice = kilometers.toFixed(2);
+    // attendance.punchOutDistanceFromOffice = kilometers.toFixed(2);
+    attendance.punchOutDistanceFromOffice = kilometers;
     attendance.punchOut = new Date().toTimeString().slice(0, 8);
     attendance.punchOutLocation = punchOutLocation
     attendance.updatedBy = userId;
