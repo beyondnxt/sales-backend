@@ -27,7 +27,7 @@ export class AttendanceService {
     private readonly mapLogRepository: Repository<MapLog>,
   ) { }
 
-  @Cron('0 45 12 * * *')
+  @Cron('0 0 6 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();

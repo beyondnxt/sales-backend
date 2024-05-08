@@ -43,12 +43,12 @@ export class MapLogService {
 
     async update(id: number, mapLogData: MapLog): Promise<MapLog> {
         try {
-            const MapLog = await this.mapLogRepository.findOne({ where: { id } });
+            const mapLog = await this.mapLogRepository.findOne({ where: { id } });
             if (!MapLog) {
                 throw new NotFoundException(`MapLog  with ID ${id} not found`);
             }
-            this.mapLogRepository.merge(MapLog, mapLogData);
-            return await this.mapLogRepository.save(MapLog);
+            mapLog.location.push(mapLogData);
+            return await this.mapLogRepository.save(mapLog);
         } catch (error) {
             throw new Error(`Unable to update MapLog  : ${error.message}`);
         }

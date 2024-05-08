@@ -3,7 +3,7 @@ import { MapLogService } from './map-log.service';
 import { MapLog } from './entity/map-log.entity';
 import { CreateMapLogDto } from './dto/map-log.dto';
 
-@Controller('map-log')
+@Controller('maplog')
 export class MapLogController {
     constructor(private readonly mapLogService: MapLogService) { }
 
