@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Like, Repository } from "typeorm";
+import { Like, Not, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 
 @Injectable()
@@ -83,20 +83,16 @@ export class UserService {
         }
     }
 
-    async updateUser(id: number, user: User): Promise<User> {
+    async updateUser(id: number, user: User): Promise<any> {
         const existingUser = await this.userRepository.findOne({ where: { id } });
         if (!existingUser) {
             throw new NotFoundException(`User with id ${id} not found`);
         }
-
-        existingUser.firstName = user.firstName;
-        existingUser.lastName = user.lastName;
-        existingUser.phoneNumber = user.phoneNumber;
-        existingUser.email = user.email;
-        existingUser.roleId = user.roleId;
-        existingUser.companyId = user.companyId;
-        existingUser.status = user.status;
-
+        Object.assign(existingUser, user);
+        const userWithSameEmail = await this.userRepository.findOne({ where: { email: user.email, id: Not(id) } });
+        if (userWithSameEmail) {
+            throw new NotFoundException (`Email already exists` )
+        }
         return await this.userRepository.save(existingUser);
     }
 
