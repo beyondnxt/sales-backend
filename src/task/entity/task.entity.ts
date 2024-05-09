@@ -7,7 +7,7 @@ export class Task {
     @PrimaryGeneratedColumn()
     id: number
 
-    @Column()
+    @Column({ default: null })
     taskType: string
 
     @Column({ default: null })
@@ -24,16 +24,16 @@ export class Task {
     @JoinColumn({ name: 'assignTo' })
     user: User;
 
-    @Column()
+    @Column({ default: null })
     description: string
 
-    @Column()
+    @Column({ default: null })
     status: string
 
     @Column({ type: 'simple-json', default: null })
     feedBack: { [key: string]: any };
 
-    @Column()
+    @Column({ default: null })
     location: string
 
     @Column({ default: null })
