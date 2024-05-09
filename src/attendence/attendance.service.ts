@@ -284,7 +284,9 @@ export class AttendanceService {
         userId: attendance.userId,
         attendance: [{
           // userId: attendance.userId,
+          punchInTime: attendance.punchIn,
           punchIn: this.formatCoordinates(attendance.punchInLocation),
+          punchOutTime: attendance.punchOut,
           punchOut: this.formatCoordinates(attendance.punchOutLocation),
           createdOn: attendance.createdOn
         }],
