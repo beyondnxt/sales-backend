@@ -160,8 +160,7 @@ export class TaskService {
             throw new Error(`Unable to update tasks: ${error.message}`);
         }
     }
-
-
+    
     async remove(id: number): Promise<any> {
         const task = await this.taskRepository.findOne({ where: { id } });
         if (!task) {
