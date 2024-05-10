@@ -13,6 +13,12 @@ export class AttendanceController {
         return this.attendanceService.getLastAttendanceByUserId(userId);
     }
 
+    @Get('record')
+    async getRecordData(@Req() req: Request): Promise<Attendance> {
+        const userId = req.headers['userid'];
+        return this.attendanceService.getRecordData(userId);
+    }
+
     @Put('updatePunchIn/:userId')
     updatePunchIn(@Param('userId') userId: number, @Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {

@@ -27,7 +27,7 @@ export class AttendanceService {
     private readonly mapLogRepository: Repository<MapLog>,
   ) { }
 
-  @Cron('0 0 6 * * *')
+  @Cron('0 28 21 * * *')
   async handleAttendanceUpdate() {
     try {
       const users = await this.userRepository.find();
@@ -35,7 +35,8 @@ export class AttendanceService {
       for (const user of users) {
         const attendance = this.attendanceRepository.create({
           userId: user.id,
-          status: 'Absent'
+          status: 'Absent',
+          record: 'Empty'
         })
         await this.attendanceRepository.save(attendance);
       }
@@ -72,7 +73,8 @@ export class AttendanceService {
     attendance.punchInDistanceFromOffice = kilometers;
     attendance.punchIn = new Date().toTimeString().slice(0, 8);
     attendance.punchInLocation = punchInLocation
-    attendance.status = 'Present'
+    attendance.status = 'Present',
+      attendance.record = 'In'
     if (!attendance) {
       throw new NotFoundException(`Attendance with ID ${userId} not found`);
     }
@@ -259,6 +261,37 @@ export class AttendanceService {
       .getOne();
   }
 
+  async getRecordData(userId: number): Promise<any> {
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+
+    const attendanceRecord = await this.attendanceRepository.createQueryBuilder('attendance')
+      .where('attendance.userId = :userId', { userId })
+      .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
+      .select('attendance.record')
+      .getOne();
+
+    if (!attendanceRecord) {
+      const users = await this.userRepository.find();
+
+      for (const user of users) {
+        const attendance = this.attendanceRepository.create({
+          userId: user.id,
+          status: 'Absent',
+          record: 'Empty'
+        })
+        await this.attendanceRepository.save(attendance);
+      }
+      return { message: 'User insert successfully' }
+    } else if (attendanceRecord.record === 'Empty') {
+      return { message: 'punchIn' };
+    } else if (attendanceRecord.record === 'In') {
+      return { message: 'punchOut' };
+    } else {
+      return { message: 'Disable' }
+    }
+  }
+
   async findById(id: number): Promise<any> {
     const attendance = await this.attendanceRepository.findOne({ where: { id } });
 
@@ -340,6 +373,7 @@ export class AttendanceService {
     attendance.punchOut = new Date().toTimeString().slice(0, 8);
     attendance.punchOutLocation = punchOutLocation
     attendance.updatedBy = userId;
+    attendance.record = 'Out'
     if (!attendance) {
       throw new NotFoundException(`Attendance with ID ${userId} not found`);
     }
