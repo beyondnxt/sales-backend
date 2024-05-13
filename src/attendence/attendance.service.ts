@@ -27,18 +27,30 @@ export class AttendanceService {
     private readonly mapLogRepository: Repository<MapLog>,
   ) { }
 
-  @Cron('0 28 21 * * *')
+  @Cron('0 30 10 * * *')
   async handleAttendanceUpdate() {
     try {
+      const currentDate = new Date();
+      const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
       const users = await this.userRepository.find();
 
       for (const user of users) {
-        const attendance = this.attendanceRepository.create({
-          userId: user.id,
-          status: 'Absent',
-          record: 'Empty'
-        })
-        await this.attendanceRepository.save(attendance);
+        const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
+          .where('attendance.userId = :userId', { userId: user.id })
+          .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
+
+        if (!existingAttendance) {
+          const newAttendance = this.attendanceRepository.create({
+            userId: user.id,
+            status: 'Absent',
+            record: 'Empty',
+            createdOn: currentDate,
+          });
+
+          await this.attendanceRepository.save(newAttendance);
+        } else {
+          console.log(`Attendance record already exists for user ${user.id} for today.`);
+        }
       }
     } catch (error) {
       console.error('Error occurred during attendance update:', error);
