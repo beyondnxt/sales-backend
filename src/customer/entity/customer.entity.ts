@@ -39,11 +39,11 @@ export class Customer {
     @Column({ default: null })
     contactNo: string;
 
-    @Column({ default: null })
-    latitude: number
+    @Column({ nullable: true })
+    latitude: string
 
-    @Column({ default: null })
-    longitude: number
+    @Column({ nullable: true })
+    longitude: string
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
@@ -58,8 +58,8 @@ export class Customer {
     updatedBy: number
 
     @OneToMany(() => Order, order => order.customer)
-    order: Order[];
+    order: Order[]
 
     @OneToMany(() => Task, task => task.customer)
-    task: Task[];
+    task: Task[]
 }

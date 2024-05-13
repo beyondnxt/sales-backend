@@ -9,10 +9,10 @@ export class CreateCustomerDto{
     area: string
     email: string
     contactNo: string
-    latitude: number
-    longitude: number
-    createdOn: Date;
+    latitude: string
+    longitude: string
+    createdOn: Date
     createdBy: number
-    updatedOn: Date;
+    updatedOn: Date
     updatedBy: number
 }
