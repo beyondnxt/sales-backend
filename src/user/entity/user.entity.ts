@@ -44,33 +44,36 @@ export class User {
 
     @ManyToOne(() => Company, company => company.user)
     @JoinColumn({ name: 'companyId' })
-    company: Company;
+    company: Company
 
     @Column()
-    status: boolean;
+    status: boolean
+
+    @Column({default: false})
+    deleted: boolean
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
-    createdOn: Date;
+    createdOn: Date
 
     @Column({ default: null })
     createdBy: number
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
-    updatedOn: Date;
+    updatedOn: Date
 
     @Column({ default: null })
     updatedBy: number
 
     @OneToMany(() => LeaveRequest, leave => leave.user)
-    leave: LeaveRequest[];
+    leave: LeaveRequest[]
 
     @OneToMany(() => Attendance, attendance => attendance.user)
-    attendance: Attendance[];
+    attendance: Attendance[]
 
     @OneToMany(() => Task, task => task.user)
-    task: Task[];
+    task: Task[]
 
     @OneToMany(() => MapLog, mapLog => mapLog.user)
-    mapLog: MapLog[];
+    mapLog: MapLog[]
 
 }

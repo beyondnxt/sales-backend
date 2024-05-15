@@ -27,6 +27,7 @@ export class UserService {
         let queryBuilder = this.userRepository.createQueryBuilder('user')
             .leftJoinAndSelect('user.role', 'role')
             .leftJoinAndSelect('user.company', 'company')
+            .where('user.deleted = :deleted', { deleted: false })
             .take(limit)
             .andWhere(where);
 
@@ -73,7 +74,7 @@ export class UserService {
 
     async getUserById(userId: number): Promise<User | undefined> {
         try {
-            const user = this.userRepository.findOne({ where: { id: userId } });
+            const user = this.userRepository.findOne({ where: { id: userId, deleted: false } });
             if (!user) {
                 throw new NotFoundException('User not found');
             }
@@ -84,24 +85,25 @@ export class UserService {
     }
 
     async updateUser(id: number, user: User): Promise<any> {
-        const existingUser = await this.userRepository.findOne({ where: { id } });
+        const existingUser = await this.userRepository.findOne({ where: { id, deleted: false } });
         if (!existingUser) {
             throw new NotFoundException(`User with id ${id} not found`);
         }
         Object.assign(existingUser, user);
         const userWithSameEmail = await this.userRepository.findOne({ where: { email: user.email, id: Not(id) } });
         if (userWithSameEmail) {
-            throw new NotFoundException (`Email already exists` )
+            throw new NotFoundException(`Email already exists`)
         }
         return await this.userRepository.save(existingUser);
     }
 
     async deleteUser(id: number): Promise<{ message: string }> {
-        const user = await this.userRepository.findOne({ where: { id } });
+        const user = await this.userRepository.findOne({ where: { id, deleted: false } });
         if (!user) {
             throw new NotFoundException('user not found');
         }
-        await this.userRepository.remove(user);
+        user.deleted = true
+        await this.userRepository.save(user);
         return { message: `Successfully deleted id ${id}` }
     }
 

@@ -1,14 +1,15 @@
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateUserDto {
-    firstName: string;
-    lastName: string;
-    phoneNumber: string;
-    email: string;
-    password: string;
-    roleId: number;
+    firstName: string
+    lastName: string
+    phoneNumber: string
+    email: string
+    password: string
+    roleId: number
     companyId: number
-    status: boolean;
+    status: boolean
+    deleted: boolean
   }
 
   export class userCreated {

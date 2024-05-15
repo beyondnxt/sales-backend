@@ -32,7 +32,11 @@ export class AttendanceService {
     try {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
-      const users = await this.userRepository.find();
+      const users = await this.userRepository.find({
+        where: {
+          deleted: false
+        }
+      })
 
       for (const user of users) {
         const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
@@ -58,7 +62,7 @@ export class AttendanceService {
   }
 
   async updatePunchIn(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
-    const user = await this.userRepository.findOne({ where: { id: userId } })
+    const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);
     }
@@ -149,6 +153,7 @@ export class AttendanceService {
 
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.user', 'user')
+      .where('user.deleted = :deleted', { deleted: false })
       .andWhere(whereCondition)
       .take(limit)
 
@@ -284,7 +289,7 @@ export class AttendanceService {
       .getOne();
 
     if (!attendanceRecord) {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } });
       const attendance = this.attendanceRepository.create({
         userId: user.id,
         status: 'Absent',
@@ -361,7 +366,7 @@ export class AttendanceService {
   }
 
   async updatePunchOut(updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } });
     const company = await this.companyRepository.findOne({ where: { id: user.companyId } });
     const currentDate = new Date();
     const attendance = await this.attendanceRepository.findOne({
@@ -392,7 +397,7 @@ export class AttendanceService {
 
   async updateStatus(id: number, status: string, userId: number): Promise<Attendance> {
     try {
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } });
       if (!user) {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }

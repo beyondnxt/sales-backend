@@ -14,7 +14,7 @@ export class AuthService {
     ) { }
 
     async signUp(signUpDto: CreateUserDto): Promise<any> {
-        const { firstName, lastName, phoneNumber, email, password, roleId, companyId, status } = signUpDto;
+        const { firstName, lastName, phoneNumber, email, password, roleId, companyId, status, deleted } = signUpDto;
         const existingUser = await this.userRepository.findOne({ where: { email } });
         if (existingUser) {
             throw new UnauthorizedException('Email already exists');
@@ -28,7 +28,8 @@ export class AuthService {
             password: hashedPassword,
             roleId,
             companyId,
-            status
+            status,
+            deleted
         });
         await this.userRepository.save(user);
         const token = this.jwtService.sign({ id: user.id });
@@ -55,10 +56,10 @@ export class AuthService {
     }
 
     async getUserInfo(id: number): Promise<any> {
-        const user = await this.userRepository
-            .createQueryBuilder('user')
+        const user = await this.userRepository.createQueryBuilder('user')
             .select(['user.id', 'user.firstName', 'user.lastName', 'user.phoneNumber', 'user.email', 'user.roleId', 'user.status'])
             .where('user.id = :id', { id })
+            .andWhere('user.deleted = :deleted', { deleted: false })
             .getOne();
 
         if (!user) {
@@ -74,7 +75,7 @@ export class AuthService {
             if (!result) {
                 throw new NotFoundException('User not found');
             }
-            return await this.userRepository.findOne({ where: { id } });
+            return await this.userRepository.findOne({ where: { id, deleted: false } });
         } catch (error) {
             console.error('Error changing password:', error);
             throw new InternalServerErrorException('Failed to change password');
@@ -82,7 +83,7 @@ export class AuthService {
     }
 
     async forgotPassword(email: string, newPassword: string): Promise<User> {
-        const existingUser = await this.userRepository.findOne({ where: { email } });
+        const existingUser = await this.userRepository.findOne({ where: { email, deleted: false } });
         if (!existingUser) {
             throw new NotFoundException('Invalid email');
         }
@@ -102,7 +103,7 @@ export class AuthService {
 
     async sendEmailForgotPassword(email: string): Promise<boolean> {
         try {
-            const user = await this.userRepository.findOne({ where: { email } });
+            const user = await this.userRepository.findOne({ where: { email, deleted: false } });
             if (!user) {
                 throw new NotFoundException('User not found');
             }
