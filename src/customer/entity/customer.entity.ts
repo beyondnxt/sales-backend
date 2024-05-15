@@ -45,6 +45,9 @@ export class Customer {
     @Column({ nullable: true })
     longitude: string
 
+    @Column({ default: false })
+    deleted: boolean
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 

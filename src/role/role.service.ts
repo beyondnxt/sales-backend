@@ -26,6 +26,7 @@ export class RoleService {
       where.name = Like(`%${name}%`);
     }
     let queryBuilder = this.roleRepository.createQueryBuilder('role')
+      .where('role.deleted = :deleted', { deleted: false })
       .andWhere(where);
 
     if (page !== "all") {
@@ -47,7 +48,7 @@ export class RoleService {
 
   async getRoleById(id: number): Promise<Role> {
     try {
-      return await this.roleRepository.findOne({ where: { id } });
+      return await this.roleRepository.findOne({ where: { id, deleted: false } });
     } catch (error) {
       throw new Error(`Unable to fetch role: ${error.message}`);
     }
@@ -55,7 +56,7 @@ export class RoleService {
 
   async updateRole(id: number, updateRoleDto: CreateRoleDto): Promise<Role> {
     try {
-      const role = await this.roleRepository.findOne({ where: { id } });
+      const role = await this.roleRepository.findOne({ where: { id, deleted: false } });
       if (!role) {
         throw new NotFoundException(`Role with ID ${id} not found`);
       }
@@ -68,11 +69,12 @@ export class RoleService {
 
   async remove(id: number): Promise<void> {
     try {
-      const role = await this.roleRepository.findOne({ where: { id } });
+      const role = await this.roleRepository.findOne({ where: { id, deleted: false } });
       if (!role) {
         throw new NotFoundException(`Role with ID ${id} not found`);
       }
-      await this.roleRepository.remove(role);
+      role.deleted = true
+      await this.roleRepository.save(role);
     } catch (error) {
       throw new Error(`Unable to delete role: ${error.message}`);
     }

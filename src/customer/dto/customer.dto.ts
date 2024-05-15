@@ -11,6 +11,7 @@ export class CreateCustomerDto{
     contactNo: string
     latitude: string
     longitude: string
+    deleted: boolean
     createdOn: Date
     createdBy: number
     updatedOn: Date

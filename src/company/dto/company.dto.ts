@@ -4,6 +4,7 @@ export class CreateCompanyDto{
     email: string
     phoneNo: string
     location: string
+    deleted: boolean
     createdOn: Date
     createdBy: number
     updatedOn: Date

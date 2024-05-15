@@ -14,17 +14,18 @@ export class CompanyService {
     async create(companyData: CreateCompanyDto, userId: number): Promise<Company> {
         const { latitude, longitude, ...rest } = companyData;
         const location = `${latitude},${longitude}`;
-        
+
         const company = this.companyRepository.create({
             ...rest,
             location,
-            createdBy: userId 
+            createdBy: userId
         });
         return await this.companyRepository.save(company);
     }
-    
+
     async findAll(page: number = 1, limit: number = 10): Promise<{ data: Company[], totalCount: number }> {
         const [data, totalCount] = await this.companyRepository.findAndCount({
+            where: { deleted: false },
             skip: (page - 1) * limit,
             take: limit,
         });
@@ -32,7 +33,7 @@ export class CompanyService {
     }
 
     async findOne(id: number): Promise<Company> {
-        const company = await this.companyRepository.findOne({ where: { id } });
+        const company = await this.companyRepository.findOne({ where: { id, deleted: false } });
         if (!company) {
             throw new NotFoundException('company not found');
         }
@@ -41,7 +42,7 @@ export class CompanyService {
 
     async update(id: number, companyData: CreateCompanyDto, userId): Promise<Company> {
         try {
-            const company = await this.companyRepository.findOne({ where: { id } });
+            const company = await this.companyRepository.findOne({ where: { id, deleted: false } });
             if (!company) {
                 throw new NotFoundException(`company with ID ${id} not found`);
             }
@@ -54,11 +55,12 @@ export class CompanyService {
     }
 
     async remove(id: number): Promise<any> {
-        const existingCompany = await this.companyRepository.findOne({ where: { id } });
+        const existingCompany = await this.companyRepository.findOne({ where: { id, deleted: false } });
         if (!existingCompany) {
             throw new NotFoundException('company not found');
         }
-        await this.companyRepository.remove(existingCompany);
+        existingCompany.deleted = true
+        await this.companyRepository.save(existingCompany);
         return { message: `Successfully deleted id ${id}` }
     }
 }

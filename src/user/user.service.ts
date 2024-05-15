@@ -59,8 +59,6 @@ export class UserService {
             total: totalCount
         };
     }
-
-
     async getUsers(page: number = 1, limit: number = 10): Promise<{ data: User[]; total: number }> {
         try {
             const [data, total] = await this.userRepository.findAndCount({

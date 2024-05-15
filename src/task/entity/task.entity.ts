@@ -39,6 +39,9 @@ export class Task {
     @Column({ default: null })
     followUpDate: Date
 
+    @Column({ default: false })
+    deleted: boolean
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 

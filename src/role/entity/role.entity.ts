@@ -16,6 +16,9 @@ export class Role {
   @Column({ type: 'simple-json', default: null }) // Assuming menuAccess is stored as JSON
   menuAccess: { [key: string]: any };
 
+  @Column({ default: false })
+  deleted: boolean
+
   @OneToMany(() => User, user => user.role)
   user: User[];
 

@@ -153,6 +153,7 @@ export class AttendanceService {
 
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.user', 'user')
+      .where('attendance.deleted = :deleted', { deleted: false })
       .where('user.deleted = :deleted', { deleted: false })
       .andWhere(whereCondition)
       .take(limit)
@@ -187,6 +188,7 @@ export class AttendanceService {
         punchInDistanceFromOffice: attendance.punchInDistanceFromOffice,
         punchOutDistanceFromOffice: attendance.punchOutDistanceFromOffice,
         status: attendance.status,
+        deleted: attendance.deleted,
         createdOn: attendance.createdOn,
         updatedBy: attendance.updatedBy,
         updatedOn: attendance.updatedOn
@@ -207,6 +209,8 @@ export class AttendanceService {
 
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.user', 'user')
+      .where('attendance.deleted = :deleted', { deleted: false })
+      .where('user.deleted = :deleted', { deleted: false })
       .andWhere(whereCondition);
 
     if (filters.startDate) {
@@ -274,6 +278,8 @@ export class AttendanceService {
   async getLastAttendanceByUserId(userId: number): Promise<Attendance> {
     return this.attendanceRepository.createQueryBuilder('attendance')
       .where('attendance.userId = :userId', { userId })
+      .where('attendance.deleted = :deleted', { deleted: false })
+      .where('user.deleted = :deleted', { deleted: false })
       .orderBy('attendance.updatedOn', 'DESC')
       .getOne();
   }
@@ -283,7 +289,9 @@ export class AttendanceService {
     const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
 
     const attendanceRecord = await this.attendanceRepository.createQueryBuilder('attendance')
+      .where('attendance.deleted = :deleted', { deleted: false })
       .where('attendance.userId = :userId', { userId })
+      .where('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
       .select('attendance.record')
       .getOne();
@@ -307,7 +315,7 @@ export class AttendanceService {
   }
 
   async findById(id: number): Promise<any> {
-    const attendance = await this.attendanceRepository.findOne({ where: { id } });
+    const attendance = await this.attendanceRepository.findOne({ where: { id, deleted: false } });
 
     if (!attendance) {
       return (`Attendance with ID ${id} not found`);
@@ -318,12 +326,15 @@ export class AttendanceService {
     const usermap = await this.mapLogRepository.createQueryBuilder('mapLog')
       .leftJoinAndSelect('mapLog.user', 'user')
       .where('mapLog.userId = :userId', { userId: attendance.userId })
+      .where('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
       .getOne();
 
     const userTask: any = await this.taskRepository.createQueryBuilder('task')
       .leftJoinAndSelect('task.customer', 'customer')
       .where('task.assignTo = :userId', { userId: attendance.userId })
+      .where('task.deleted = :deleted', { deleted: false })
+      .where('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(task.createdOn) = :date', { date: formattedDate })
       .getMany();
     return {
@@ -367,11 +378,12 @@ export class AttendanceService {
 
   async updatePunchOut(updateAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } });
-    const company = await this.companyRepository.findOne({ where: { id: user.companyId } });
+    const company = await this.companyRepository.findOne({ where: { id: user.companyId, deleted: false } });
     const currentDate = new Date();
     const attendance = await this.attendanceRepository.findOne({
       where: {
         userId,
+        deleted: false,
         createdOn: MoreThanOrEqual(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate()))
       }
     });
@@ -402,10 +414,10 @@ export class AttendanceService {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
       const roleId = user.roleId;
-      const role = await this.roleRepository.findOne({ where: { id: roleId } });
+      const role = await this.roleRepository.findOne({ where: { id: roleId, deleted: false } });
       const isAdmin = role.name == 'Admin';
       if (isAdmin) {
-        const attendance = await this.attendanceRepository.findOne({ where: { id } });
+        const attendance = await this.attendanceRepository.findOne({ where: { id, deleted: false } });
         if (!attendance) {
           throw new NotFoundException(`No attendance found with the provided IDs`);
         }
@@ -421,11 +433,12 @@ export class AttendanceService {
   }
 
   async delete(id: number): Promise<{ message: string }> {
-    const attendance = await this.attendanceRepository.delete(id);
+    const attendance = await this.roleRepository.findOne({ where: { id, deleted: false } });
     if (!attendance) {
-      throw new NotFoundException(`Attendance with ID ${id} not found`);
+      throw new NotFoundException(`Role with ID ${id} not found`);
     }
-    return { message: `Successfully deleted id ${id}` };
+    attendance.deleted = true
+    await this.roleRepository.save(attendance);
+    return { message: 'successfully deleted' }
   }
-
 }

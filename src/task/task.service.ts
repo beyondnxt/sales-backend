@@ -52,8 +52,11 @@ export class TaskService {
         }
 
         let queryBuilder = this.taskRepository.createQueryBuilder('task')
+            .where('task.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('task.user', 'user')
+            .where('user.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('task.customer', 'customer')
+            .where('customer.deleted = :deleted', { deleted: false })
             .andWhere(where);
 
         if (filters.startDate) {
@@ -80,9 +83,9 @@ export class TaskService {
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
 
-        const user = await this.userRepository.findOne({ where: { id: userId } })
+        const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
         const roleId = user.roleId;
-        const role = await this.roleRepository.findOne({ where: { id: roleId } });
+        const role = await this.roleRepository.findOne({ where: { id: roleId, deleted: false } });
         const isAdmin = role.name == 'Admin';
         if (!isAdmin) {
             queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id });
@@ -105,6 +108,7 @@ export class TaskService {
                 feedBack: task.feedBack ? task.feedBack : null,
                 location: task.location,
                 followUpDate: task.followUpDate,
+                deleted: task.deleted,
                 createdOn: task.createdOn,
                 createdBy: task.createdBy,
                 userName: task.createdBy.userName,
@@ -115,7 +119,7 @@ export class TaskService {
     }
 
     async findTaskById(id: number): Promise<Task> {
-        const task = await this.taskRepository.findOne({ where: { id } })
+        const task = await this.taskRepository.findOne({ where: { id, deleted: false } })
         if (!task) {
             throw new NotFoundException(`task with ID ${id} not found`);
         }
@@ -124,7 +128,7 @@ export class TaskService {
 
     async update(id: number, taskData: CreateTaskDto, userId): Promise<Task> {
         try {
-            const task = await this.taskRepository.findOne({ where: { id } });
+            const task = await this.taskRepository.findOne({ where: { id, deleted: false } });
             task.updatedBy = userId
             if (!task) {
                 throw new NotFoundException(`task with ID ${id} not found`);
@@ -138,12 +142,12 @@ export class TaskService {
 
     async updateStatus(ids: number[], userId: number): Promise<Task[]> {
         try {
-            const user = await this.userRepository.findOne({ where: { id: userId } });
+            const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } });
             if (!user) {
                 throw new NotFoundException(`User with ID ${userId} not found`);
             }
             const roleId = user.roleId;
-            const role = await this.roleRepository.findOne({ where: { id: roleId } });
+            const role = await this.roleRepository.findOne({ where: { id: roleId, deleted: false } });
             const isAdmin = role.name == 'Admin';
             if (isAdmin) {
                 const tasks = await this.taskRepository.find({
@@ -170,11 +174,12 @@ export class TaskService {
     }
 
     async remove(id: number): Promise<any> {
-        const task = await this.taskRepository.findOne({ where: { id } });
+        const task = await this.taskRepository.findOne({ where: { id, deleted: false } });
         if (!task) {
             throw new NotFoundException('task not found');
         }
-        await this.taskRepository.remove(task);
+        task.deleted = true
+        await this.taskRepository.save(task);
         return { message: `Successfully deleted id ${id}` }
     }
 }

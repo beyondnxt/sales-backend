@@ -9,6 +9,7 @@ export class CreateTaskDto {
     followUpDate: Date
     latitude: number
     longitude: number
+    deleted: boolean
     createdOn: Date
     createdBy: { [key: string]: any }
     updatedOn: Date

@@ -22,6 +22,9 @@ export class Company {
     @Column()
     location: string
 
+    @Column({ default: false })
+    deleted: boolean
+
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 
