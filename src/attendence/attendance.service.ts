@@ -284,16 +284,13 @@ export class AttendanceService {
       .getOne();
 
     if (!attendanceRecord) {
-      const users = await this.userRepository.find();
-
-      for (const user of users) {
-        const attendance = this.attendanceRepository.create({
-          userId: user.id,
-          status: 'Absent',
-          record: 'Empty'
-        })
-        await this.attendanceRepository.save(attendance);
-      }
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const attendance = this.attendanceRepository.create({
+        userId: user.id,
+        status: 'Absent',
+        record: 'Empty'
+      })
+      await this.attendanceRepository.save(attendance);
       return { message: 'User insert successfully' }
     } else if (attendanceRecord.record === 'Empty') {
       return { message: 'punchIn' };
