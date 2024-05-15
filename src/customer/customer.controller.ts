@@ -26,6 +26,15 @@ export class CustomerController {
         }
     }
 
+    @Get('/all')
+    async getCustomerName(): Promise<{ data: any[] }> {
+      try {
+        return await this.customerService.getCustomerName();
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+
     @Get(':id')
     async findOne(@Param('id') id: number): Promise<Customer> {
         try {

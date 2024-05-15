@@ -40,7 +40,7 @@ export class TaskService {
             taskType: string, status: string
             startDate: Date, assignToName: string, customerName: string,
             userName: string
-        }): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        }, userId: number): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
         if (filters.taskType) {
@@ -73,11 +73,19 @@ export class TaskService {
 
         if (filters.customerName) {
             queryBuilder = queryBuilder.andWhere('customer.name LIKE :name', { name: `%${filters.customerName}%` });
-        }               
+        }
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
             queryBuilder = queryBuilder.skip(skip).take(limit);
+        }
+
+        const user = await this.userRepository.findOne({ where: { id: userId } })
+        const roleId = user.roleId;
+        const role = await this.roleRepository.findOne({ where: { id: roleId } });
+        const isAdmin = role.name == 'Admin';
+        if (!isAdmin) {
+            queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id });
         }
 
         const [taskData, totalCount] = await Promise.all([
@@ -160,7 +168,7 @@ export class TaskService {
             throw new Error(`Unable to update tasks: ${error.message}`);
         }
     }
-    
+
     async remove(id: number): Promise<any> {
         const task = await this.taskRepository.findOne({ where: { id } });
         if (!task) {

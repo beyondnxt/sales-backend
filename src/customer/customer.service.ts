@@ -41,6 +41,16 @@ export class CustomerService {
         };;
     }
 
+    async getCustomerName(): Promise<{ data: any[] }> {
+        const role = await this.customerRepository.find();
+        return {
+          data: role.map(role => ({
+            id: role.id,
+            customerName: role.name
+          })),
+        };
+      }
+
     async findOne(id: number): Promise<Customer> {
         const customerData = await this.customerRepository.findOne({ where: { id } });
         if (!customerData) {
