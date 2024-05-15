@@ -15,7 +15,7 @@ export class UserController {
   }
 
   @Get()
-  async getUsersWithRole(@Query('page')page: number | "all" = 1, @Query('limit') limit: number, @Query('firstName') firstName: string,
+  async getUsersWithRole(@Query('page') page: number | "all" = 1, @Query('limit') limit: number, @Query('firstName') firstName: string,
     @Query('lastName') lastName: string): Promise<{ data: any[], total: number }> {
     try {
       return await this.userService.getUsersWithRoles(page, limit, firstName, lastName)
@@ -48,9 +48,9 @@ export class UserController {
   }
 
   @Delete(':id')
-  async deleteUser(@Param('id') id: number): Promise<void> {
+  async deleteUser(@Param('id') id: number): Promise<any> {
     try {
-      await this.userService.deleteUser(id);
+      return await this.userService.deleteUser(id);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
