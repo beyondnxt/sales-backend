@@ -53,7 +53,8 @@ export class UserService {
                 companyId: user.companyId,
                 companyName: user.company.companyName,
                 createdOn: user.createdOn,
-                status: user.status
+                status: user.status,
+                deleted: user.deleted
             })),
             total: totalCount
         };
