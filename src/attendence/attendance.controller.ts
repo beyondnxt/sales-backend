@@ -32,10 +32,11 @@ export class AttendanceController {
     @Get()
     findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number,
         @Query('startDate') startDate: Date,
-        @Query('userName') userName: string
+        @Query('userName') userName: string,
+        @Query('isNotify') isNotify: string
     ): Promise<{ data: any[], fetchedCount: number, total: number }> {
         try {
-            return this.attendanceService.findAll(page, limit, { startDate, userName });
+            return this.attendanceService.findAll(page, limit, { startDate, userName, isNotify });
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }

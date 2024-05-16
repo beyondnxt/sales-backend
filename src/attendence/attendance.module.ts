@@ -8,10 +8,12 @@ import { Company } from 'src/company/entity/company.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { MapLog } from 'src/map-log/entity/map-log.entity';
 import { Task } from 'src/task/entity/task.entity';
+import { WebsocketGateway } from 'src/gateway/websocket.gateway';
+import { UserService } from 'src/user/user.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Attendance, User, Company, Role, MapLog, Task])],
-  providers: [AttendanceService],
+  providers: [AttendanceService, WebsocketGateway, UserService],
   controllers: [AttendanceController]
 })
 export class AttendanceModule {}

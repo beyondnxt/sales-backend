@@ -9,6 +9,9 @@ export class CreateAttendanceDto{
     status: string
     record: string
     deleted: boolean
+    isPunchInApproved: string
+    isPunchOutApproved: string
+    isNotify: boolean
     createdOn: Date
     updatedBy: number
     updatedOn: Date

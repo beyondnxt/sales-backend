@@ -9,6 +9,7 @@ import { Role } from 'src/role/entity/role.entity';
 import { Cron } from '@nestjs/schedule';
 import { Task } from 'src/task/entity/task.entity';
 import { MapLog } from 'src/map-log/entity/map-log.entity';
+import { WebsocketGateway } from 'src/gateway/websocket.gateway';
 
 @Injectable()
 export class AttendanceService {
@@ -25,9 +26,10 @@ export class AttendanceService {
     private readonly taskRepository: Repository<Task>,
     @InjectRepository(MapLog)
     private readonly mapLogRepository: Repository<MapLog>,
+    private appGateway: WebsocketGateway,
   ) { }
 
-  @Cron('0 30 10 * * *')
+  @Cron('0 14 11 * * *')
   async handleAttendanceUpdate() {
     try {
       const currentDate = new Date();
@@ -42,7 +44,6 @@ export class AttendanceService {
         const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
           .where('attendance.userId = :userId', { userId: user.id })
           .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
-
         if (!existingAttendance) {
           const newAttendance = this.attendanceRepository.create({
             userId: user.id,
@@ -94,6 +95,23 @@ export class AttendanceService {
     if (!attendance) {
       throw new NotFoundException(`Attendance with ID ${userId} not found`);
     }
+
+    if (kilometers > parseInt(process.env.KILOMETERS) ||
+      (attendance.punchIn &&
+        parseInt(attendance.punchIn.split(":")[0]) > parseInt(process.env.PUNCHIN_HOURS) &&
+        parseInt(attendance.punchIn.split(":")[1]) > parseInt(process.env.PUNCHIN_MINUTES)
+      )
+    ) {
+      attendance.isNotify = true;
+      const roleId = user.roleId;
+      const role = await this.roleRepository.findOne({ where: { id: roleId } });
+      const isAdmin = role.name == 'Admin';
+      if (isAdmin) {
+        this.appGateway.server.emit('admin_notification', `User ${userId} punchIn from 3 kilometers away or 9.15 above`);
+        console.log("test");
+      }
+    }
+
     Object.assign(attendance, createAttendanceDto);
     return await this.attendanceRepository.save(attendance);
   }
@@ -147,9 +165,14 @@ export class AttendanceService {
     filters: {
       startDate?: Date,
       userName?: string,
+      isNotify: string
     }
   ): Promise<{ data: any[], fetchedCount: number, total: number }> {
     const whereCondition: any = {};
+
+    if (filters.isNotify === 'true' || filters.isNotify === 'false') {
+      whereCondition.isNotify = filters.isNotify === 'true';
+    }
 
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.user', 'user')
@@ -189,6 +212,9 @@ export class AttendanceService {
         punchOutDistanceFromOffice: attendance.punchOutDistanceFromOffice,
         status: attendance.status,
         deleted: attendance.deleted,
+        isPunchInApproved: attendance.isPunchInApproved,
+        isPunchOutApproved: attendance.isPunchOutApproved,
+        isNotify: attendance.isNotify,
         createdOn: attendance.createdOn,
         updatedBy: attendance.updatedBy,
         updatedOn: attendance.updatedOn
@@ -291,7 +317,6 @@ export class AttendanceService {
     const attendanceRecord = await this.attendanceRepository.createQueryBuilder('attendance')
       .where('attendance.deleted = :deleted', { deleted: false })
       .where('attendance.userId = :userId', { userId })
-      .where('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
       .select('attendance.record')
       .getOne();
@@ -402,6 +427,21 @@ export class AttendanceService {
     attendance.record = 'Out'
     if (!attendance) {
       throw new NotFoundException(`Attendance with ID ${userId} not found`);
+    }
+    if (kilometers < parseInt(process.env.KILOMETERS) ||
+      (attendance.punchOut &&
+        parseInt(attendance.punchOut.split(":")[0]) < parseInt(process.env.punchOut_HOURS) &&
+        parseInt(attendance.punchOut.split(":")[1]) < parseInt(process.env.punchOut_MINUTES)
+      )
+    ) {
+      attendance.isNotify = true;
+      const roleId = user.roleId;
+      const role = await this.roleRepository.findOne({ where: { id: roleId } });
+      const isAdmin = role.name == 'Admin';
+      if (isAdmin) {
+        this.appGateway.server.emit('admin_notification', `User ${userId} punchOut from 3 kilometers away or below 7.45`);
+        console.log("test");
+      }
     }
     Object.assign(attendance, updateAttendanceDto);
     return await this.attendanceRepository.save(attendance);
