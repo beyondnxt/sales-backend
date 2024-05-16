@@ -41,10 +41,7 @@ export class Attendance {
   deleted: boolean
 
   @Column({ default: null })
-  isPunchInApproved: string
-
-  @Column({ default: null })
-  isPunchOutApproved: string
+  isApproved: string
 
   @Column({ default: false })
   isNotify: boolean

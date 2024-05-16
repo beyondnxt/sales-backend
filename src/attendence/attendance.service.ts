@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entity/attendence.entity';
 import { CreateAttendanceDto } from './dto/attendance.dto';
 import { User } from 'src/user/entity/user.entity';
@@ -29,7 +29,7 @@ export class AttendanceService {
     private appGateway: WebsocketGateway,
   ) { }
 
-  @Cron('0 14 11 * * *')
+  @Cron('0 0 6 * * *')
   async handleAttendanceUpdate() {
     try {
       const currentDate = new Date();
@@ -44,6 +44,8 @@ export class AttendanceService {
         const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
           .where('attendance.userId = :userId', { userId: user.id })
           .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
+          .getOne();
+
         if (!existingAttendance) {
           const newAttendance = this.attendanceRepository.create({
             userId: user.id,
@@ -51,7 +53,6 @@ export class AttendanceService {
             record: 'Empty',
             createdOn: currentDate,
           });
-
           await this.attendanceRepository.save(newAttendance);
         } else {
           console.log(`Attendance record already exists for user ${user.id} for today.`);
@@ -179,6 +180,7 @@ export class AttendanceService {
       .where('attendance.deleted = :deleted', { deleted: false })
       .where('user.deleted = :deleted', { deleted: false })
       .andWhere(whereCondition)
+      .orderBy('attendance.createdOn', 'DESC')
       .take(limit)
 
     if (filters.startDate) {
@@ -212,8 +214,7 @@ export class AttendanceService {
         punchOutDistanceFromOffice: attendance.punchOutDistanceFromOffice,
         status: attendance.status,
         deleted: attendance.deleted,
-        isPunchInApproved: attendance.isPunchInApproved,
-        isPunchOutApproved: attendance.isPunchOutApproved,
+        isApproved: attendance.isApproved,
         isNotify: attendance.isNotify,
         createdOn: attendance.createdOn,
         updatedBy: attendance.updatedBy,
@@ -470,6 +471,24 @@ export class AttendanceService {
     } catch (error) {
       throw new Error(`Unable to update attendance: ${error.message}`);
     }
+  }
+
+  async updateMultipleApproval(ids: number[]): Promise<any> {
+      const existingAttendance = await this.attendanceRepository.find({
+        where: {
+          id: In(ids)
+        }
+      })
+
+      if (!existingAttendance) {
+        throw new NotFoundException('One or more attendance records not found');
+      }
+      existingAttendance.forEach(attendance => {
+        attendance.isApproved = 'Approved';
+      });
+      const updatedAttendance = await this.attendanceRepository.save(existingAttendance);
+      
+      return updatedAttendance;
   }
 
   async delete(id: number): Promise<{ message: string }> {

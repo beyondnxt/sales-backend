@@ -1,4 +1,5 @@
 export class CreateAttendanceDto{
+    id: number
     userId: number
     punchIn: string
     punchOut: string
@@ -9,8 +10,7 @@ export class CreateAttendanceDto{
     status: string
     record: string
     deleted: boolean
-    isPunchInApproved: string
-    isPunchOutApproved: string
+    isApproved: string
     isNotify: boolean
     createdOn: Date
     updatedBy: number

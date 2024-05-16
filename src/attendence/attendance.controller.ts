@@ -82,6 +82,16 @@ export class AttendanceController {
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    
+  @Put('updateMultipleApproval')
+  async updateMultipleApprove(@Body() ids: number[]) {
+    try {
+      const attendance = await this.attendanceService.updateMultipleApproval(ids);
+      return attendance
+    } catch (error) {
+        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 
     @Delete(':id')
     deleteUser(@Param('id') id: number) {
