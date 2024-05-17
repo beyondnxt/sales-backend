@@ -474,21 +474,40 @@ export class AttendanceService {
   }
 
   async updateMultipleApproval(ids: number[]): Promise<any> {
-      const existingAttendance = await this.attendanceRepository.find({
-        where: {
-          id: In(ids)
-        }
-      })
-
-      if (!existingAttendance) {
-        throw new NotFoundException('One or more attendance records not found');
+    const existingAttendance = await this.attendanceRepository.find({
+      where: {
+        id: In(ids)
       }
-      existingAttendance.forEach(attendance => {
-        attendance.isApproved = 'Approved';
-      });
-      const updatedAttendance = await this.attendanceRepository.save(existingAttendance);
-      
-      return updatedAttendance;
+    })
+
+    if (!existingAttendance) {
+      throw new NotFoundException('One or more attendance records not found');
+    }
+    existingAttendance.forEach(attendance => {
+      attendance.isNotify = false
+      attendance.isApproved = 'Approved';
+    });
+    const updatedAttendance = await this.attendanceRepository.save(existingAttendance);
+
+    return updatedAttendance;
+  }
+
+  async updateMultipleReject(ids: number[]): Promise<any> {
+    const existingAttendance = await this.attendanceRepository.find({
+      where: {
+        id: In(ids)
+      }
+    })
+    if (!existingAttendance) {
+      throw new NotFoundException('One or more attendance records not found');
+    }
+    existingAttendance.forEach(attendance => {
+      attendance.isNotify = false
+      attendance.isApproved = 'Rejected';
+    });
+    const updatedAttendance = await this.attendanceRepository.save(existingAttendance);
+
+    return updatedAttendance;
   }
 
   async delete(id: number): Promise<{ message: string }> {
