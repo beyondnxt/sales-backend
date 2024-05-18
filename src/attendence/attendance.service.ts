@@ -306,7 +306,6 @@ export class AttendanceService {
     return this.attendanceRepository.createQueryBuilder('attendance')
       .where('attendance.userId = :userId', { userId })
       .where('attendance.deleted = :deleted', { deleted: false })
-      .where('user.deleted = :deleted', { deleted: false })
       .orderBy('attendance.updatedOn', 'DESC')
       .getOne();
   }
