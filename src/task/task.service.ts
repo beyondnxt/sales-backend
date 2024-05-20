@@ -88,7 +88,11 @@ export class TaskService {
         const role = await this.roleRepository.findOne({ where: { id: roleId, deleted: false } });
         const isAdmin = role.name == 'Admin';
         if (!isAdmin) {
-            queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id });
+            queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id })
+            // queryBuilder = queryBuilder.andWhere(
+            //     '(task.assignTo = :userId OR JSON_EXTRACT(task.createdBy, "$.userId") = :userId)',
+            //     { userId: user.id }
+            // );
         }
 
         const [taskData, totalCount] = await Promise.all([

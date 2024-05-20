@@ -351,15 +351,16 @@ export class AttendanceService {
     const usermap = await this.mapLogRepository.createQueryBuilder('mapLog')
       .leftJoinAndSelect('mapLog.user', 'user')
       .where('mapLog.userId = :userId', { userId: attendance.userId })
-      .where('user.deleted = :deleted', { deleted: false })
+      .andWhere('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
       .getOne();
 
     const userTask: any = await this.taskRepository.createQueryBuilder('task')
       .leftJoinAndSelect('task.customer', 'customer')
+      .leftJoinAndSelect('task.user', 'user')
       .where('task.assignTo = :userId', { userId: attendance.userId })
-      .where('task.deleted = :deleted', { deleted: false })
-      .where('user.deleted = :deleted', { deleted: false })
+      .andWhere('task.deleted = :deleted', { deleted: false })
+      .andWhere('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(task.createdOn) = :date', { date: formattedDate })
       .getMany();
     return {
@@ -380,7 +381,7 @@ export class AttendanceService {
           createdOn: usermap.createdOn
         }] : [],
         task: userTask.map(task => ({
-          // userId: task.assignTo,
+          userId: task.assignTo,
           customerName: task.customer.name,
           location: this.formatCoordinates(task.location),
           taskType: task.taskType,
