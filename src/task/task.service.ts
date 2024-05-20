@@ -55,6 +55,7 @@ export class TaskService {
             .where('task.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('task.user', 'user', 'user.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('task.customer', 'customer', 'customer.deleted = :deleted', { deleted: false })
+            .orderBy('task.updatedOn', 'DESC')
             .andWhere(where);
 
         if (filters.startDate) {
