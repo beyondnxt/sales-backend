@@ -42,7 +42,7 @@ export class TaskController {
     }
 
     @Get(':id')
-    async findTaskById(@Param('id') id: number): Promise<Task> {
+    async findTaskById(@Param('id') id: number): Promise<any> {
         try {
             return await this.taskService.findTaskById(id);
         } catch (error) {

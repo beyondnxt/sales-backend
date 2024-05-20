@@ -135,12 +135,39 @@ export class TaskService {
         return { totalTaskType: taskStatus }
     }
 
-    async findTaskById(id: number): Promise<Task> {
-        const task = await this.taskRepository.findOne({ where: { id, deleted: false } })
+    async findTaskById(id: number): Promise<{ data: any }> {
+        const task = await this.taskRepository.createQueryBuilder('task')
+            .where('task.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('task.user', 'user')
+            .where('user.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('task.customer', 'customer')
+            .where('customer.deleted = :deleted', { deleted: false })
+            .where('task.id = :id', { id })
+            .getOne();
         if (!task) {
             throw new NotFoundException(`task with ID ${id} not found`);
         }
-        return task
+        return {
+            data: {
+                id: task.id,
+                taskType: task.taskType,
+                customerId: task.customerId,
+                customerName: task.customer ? task.customer.name : null,
+                assignTo: task.assignTo,
+                assignToName: task.user ? task.user.firstName : null,
+                description: task.description,
+                status: task.status,
+                feedBack: task.feedBack ? task.feedBack : null,
+                location: task.location,
+                followUpDate: task.followUpDate,
+                deleted: task.deleted,
+                createdOn: task.createdOn,
+                createdBy: task.createdBy,
+                userName: task.createdBy.userName,
+                updatedOn: task.updatedOn,
+                updatedBy: task.updatedBy
+            }
+        }
     }
 
     async update(id: number, taskData: CreateTaskDto, userId): Promise<Task> {
