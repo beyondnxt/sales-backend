@@ -189,7 +189,7 @@ export class AttendanceService {
     }
 
     if (filters.userName) {
-      queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.userName });
+      queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `%${filters.userName}%` });
     }
 
     if (page !== "all") {

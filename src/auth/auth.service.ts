@@ -39,7 +39,7 @@ export class AuthService {
 
     async signIn(signInDto: userCreated): Promise<any> {
         const { email, password } = signInDto;
-        const user = await this.userRepository.findOne({ where: { email }, relations: ['role'] })
+        const user = await this.userRepository.findOne({ where: { email, deleted: false }, relations: ['role'] })
         if (!user) {
             return { message: 'Invalid email or password' };
         }
