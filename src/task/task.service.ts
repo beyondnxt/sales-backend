@@ -53,10 +53,8 @@ export class TaskService {
 
         let queryBuilder = this.taskRepository.createQueryBuilder('task')
             .where('task.deleted = :deleted', { deleted: false })
-            .leftJoinAndSelect('task.user', 'user')
-            .where('user.deleted = :deleted', { deleted: false })
-            .leftJoinAndSelect('task.customer', 'customer')
-            .where('customer.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('task.user', 'user', 'user.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('task.customer', 'customer', 'customer.deleted = :deleted', { deleted: false })
             .andWhere(where);
 
         if (filters.startDate) {
@@ -89,7 +87,7 @@ export class TaskService {
         const isAdmin = role.name == 'Admin';
         if (!isAdmin) {
             queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id })
-            // queryBuilder = queryBuilder.andWhere(
+             // queryBuilder = queryBuilder.andWhere(
             //     '(task.assignTo = :userId OR JSON_EXTRACT(task.createdBy, "$.userId") = :userId)',
             //     { userId: user.id }
             // );

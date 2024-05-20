@@ -329,7 +329,7 @@ export class AttendanceService {
         record: 'Empty'
       })
       await this.attendanceRepository.save(attendance);
-      return { message: 'User insert successfully' }
+      return { message: 'punchIn' }
     } else if (attendanceRecord.record === 'Empty') {
       return { message: 'punchIn' };
     } else if (attendanceRecord.record === 'In') {
