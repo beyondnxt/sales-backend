@@ -55,12 +55,26 @@ export class WebsocketGateway {
     this.disconnect(socket);
   }
 
+  @SubscribeMessage('admin_notification')
   sendNotificationToAdmin(
     @MessageBody() message: any,
     @ConnectedSocket() client: Socket,
   ) {
     try {
       this.server.emit('admin_notification', message);
+    } catch (error) {
+      this.disconnect(client);
+      throw error;
+    }
+  }
+
+  @SubscribeMessage('get_task_data')
+  getTaskData(
+    @MessageBody() message: any,
+    @ConnectedSocket() client: Socket,
+  ) {
+    try {
+      this.server.emit('get_task_data', message);
     } catch (error) {
       this.disconnect(client);
       throw error;
