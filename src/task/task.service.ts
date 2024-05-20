@@ -112,10 +112,27 @@ export class TaskService {
                 createdOn: task.createdOn,
                 createdBy: task.createdBy,
                 userName: task.createdBy.userName,
+                updatedOn: task.updatedOn,
+                updatedBy: task.updatedBy
             })),
             fetchedCount: taskData.length,
             total: totalCount
         };
+    }
+
+    async totalCount(userId: number): Promise<any> {
+        const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
+        const tasks = await this.taskRepository.createQueryBuilder('task')
+            .where('task.assignTo = :userId', { userId: user.id })
+            .getMany()
+
+        let taskStatus = 0
+        tasks.forEach(task => {
+            if (task.status === 'Assigned') {
+                taskStatus++
+            }
+        })
+        return { totalTaskType: taskStatus }
     }
 
     async findTaskById(id: number): Promise<Task> {

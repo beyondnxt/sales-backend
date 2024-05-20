@@ -15,7 +15,7 @@ export class AuthService {
 
     async signUp(signUpDto: CreateUserDto): Promise<any> {
         const { firstName, lastName, phoneNumber, email, password, roleId, companyId, status, deleted } = signUpDto;
-        const existingUser = await this.userRepository.findOne({ where: { email } });
+        const existingUser = await this.userRepository.findOne({ where: { email, deleted: false } });
         if (existingUser) {
             throw new UnauthorizedException('Email already exists');
         }

@@ -32,6 +32,15 @@ export class TaskController {
         }
     }
 
+    @Get('/totalCount')
+    async totalCount(userId: number): Promise<any> {
+      try {
+        return await this.taskService.totalCount(userId);
+      } catch (error) {
+        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    }
+
     @Get(':id')
     async findTaskById(@Param('id') id: number): Promise<Task> {
         try {
