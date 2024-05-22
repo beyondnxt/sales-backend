@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -39,20 +39,31 @@ export class AuthService {
 
     async signIn(signInDto: userCreated): Promise<any> {
         const { email, password } = signInDto;
-        const user = await this.userRepository.findOne({ where: { email, deleted: false }, relations: ['role'] })
+        const user = await this.userRepository.findOne({ where: { email, deleted: false }, relations: ['role'] });
+
         if (!user) {
-            return { message: 'Invalid email or password' };
+            throw new HttpException({ message: 'Invalid email or password' }, HttpStatus.NOT_FOUND);
         }
+
         if (user.status !== true) {
-            return { message: 'User is not active' };
+            throw new HttpException({ message: 'User is not active' }, HttpStatus.FORBIDDEN);
         }
+
         const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
-            return { message: 'Invalid email or password' };
+            throw new HttpException({ message: 'Invalid email or password' }, HttpStatus.NOT_FOUND);
         }
+
         const token = this.jwtService.sign({ id: user.id });
-        const userData = { userId: user.id, userName: user.firstName, roleId: user.roleId, roleName: user.role.name, token: token }
-        return userData;
+        const userData = { 
+            userId: user.id, 
+            userName: user.firstName, 
+            roleId: user.roleId, 
+            roleName: user.role.name, 
+            token: token 
+        };
+
+        return { statusCode: HttpStatus.OK, data: userData };
     }
 
     async getUserInfo(id: number): Promise<any> {
