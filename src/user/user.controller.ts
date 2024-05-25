@@ -5,10 +5,10 @@ import { User } from './entity/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @Get('/findAll')
-  async getUsers(@Query('page') page: number, @Query('limit') limit: number): Promise<{ data: User[]; total: number }> {
+  @Get('/all')
+  async getUsers(): Promise<{ data: User[] }> {
     try {
-      return await this.userService.getUsers(page, limit);
+      return await this.userService.getUsers();
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }

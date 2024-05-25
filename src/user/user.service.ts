@@ -59,16 +59,15 @@ export class UserService {
             total: totalCount
         };
     }
-    async getUsers(page: number = 1, limit: number = 10): Promise<{ data: User[]; total: number }> {
-        try {
-            const [data, total] = await this.userRepository.findAndCount({
-                take: limit,
-                skip: (page - 1) * limit,
-            });
-            return { data, total };
-        } catch (error) {
-            throw new Error(`Unable to fetch users: ${error.message}`);
-        }
+    async getUsers(): Promise<{ data: any[] }> {
+        const users = await this.userRepository.find({ where: { deleted: false } });
+        return {
+            data: users.map(user => ({
+                id: user.id,
+                firstName: user.firstName,
+                lastName: user.lastName
+            })),
+        };
     }
 
     async getUserById(userId: number): Promise<User | undefined> {
