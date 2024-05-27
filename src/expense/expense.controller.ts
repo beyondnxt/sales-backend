@@ -15,7 +15,7 @@ export class ExpenseController {
             const userId = req.headers['userid']
             return await this.expenseService.create(expenseData, userId)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -24,7 +24,7 @@ export class ExpenseController {
         try {
             return await this.expenseService.findOne(id)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -33,7 +33,7 @@ export class ExpenseController {
         try {
             return await this.expenseService.findAll(page, limit)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -43,7 +43,7 @@ export class ExpenseController {
             const userId = req.headers['userid']
             return await this.expenseService.update(id, expenseData, userId)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -52,7 +52,7 @@ export class ExpenseController {
         try {
             return await this.expenseService.delete(id)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 }

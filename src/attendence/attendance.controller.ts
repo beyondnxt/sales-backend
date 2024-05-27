@@ -25,7 +25,7 @@ export class AttendanceController {
             const userId = req.headers['userid'];
             return this.attendanceService.updatePunchIn(createAttendanceDto, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -38,7 +38,7 @@ export class AttendanceController {
         try {
             return this.attendanceService.findAll(page, limit, { startDate, userName, isNotify });
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -50,7 +50,7 @@ export class AttendanceController {
         try {
             return this.attendanceService.findReport(page, limit, { startDate, userName });
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -59,7 +59,7 @@ export class AttendanceController {
         try {
             return this.attendanceService.findById(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -70,7 +70,7 @@ export class AttendanceController {
             const userId = req.headers['userid']
             return await this.attendanceService.updateStatus(id, status, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
     @Put('updatePunchOut/:userid')
@@ -79,7 +79,7 @@ export class AttendanceController {
             const userId = req.headers['userid'];
             return this.attendanceService.updatePunchOut(updateAttendanceDto, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
     
@@ -89,7 +89,7 @@ export class AttendanceController {
       const attendance = await this.attendanceService.updateMultipleApproval(ids);
       return attendance
     } catch (error) {
-        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -99,7 +99,7 @@ export class AttendanceController {
       const attendance = await this.attendanceService.updateMultipleReject(ids);
       return attendance
     } catch (error) {
-        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -108,7 +108,7 @@ export class AttendanceController {
         try {
             return this.attendanceService.delete(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 }

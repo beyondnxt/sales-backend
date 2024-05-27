@@ -15,7 +15,7 @@ export class CompanyController {
             const userId = req.headers['userid']
             return await this.companyService.create(companyData, userId)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -24,7 +24,7 @@ export class CompanyController {
         try {
             return await this.companyService.findAll(page, limit);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -37,7 +37,7 @@ export class CompanyController {
             }
             return Company;
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -47,7 +47,7 @@ export class CompanyController {
             const userId = req.headers['userid']
             return await this.companyService.update(id, companyData, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -56,7 +56,7 @@ export class CompanyController {
         try {
             return await this.companyService.remove(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 }

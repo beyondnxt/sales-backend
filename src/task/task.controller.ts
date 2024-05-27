@@ -15,7 +15,7 @@ export class TaskController {
             const userId = req.headers['userid']
             return await this.taskService.create(taskData, userId)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -28,17 +28,17 @@ export class TaskController {
             const userId = req.headers['userid']
             return await this.taskService.findAll(page, limit, { taskType, status, startDate, assignToName, customerName, userName }, userId)
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
     @Get('/totalCount')
     async totalCount(userId: number): Promise<any> {
-      try {
-        return await this.taskService.totalCount(userId);
-      } catch (error) {
-        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-      }
+        try {
+            return await this.taskService.totalCount(userId);
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+        }
     }
 
     @Get(':id')
@@ -46,7 +46,7 @@ export class TaskController {
         try {
             return await this.taskService.findTaskById(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
     @Put('status')
@@ -55,7 +55,7 @@ export class TaskController {
             const userId = req.headers['userid']
             return await this.taskService.updateStatus(ids, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
     @Put(':id')
@@ -64,7 +64,7 @@ export class TaskController {
             const userId = req.headers['userid']
             return this.taskService.update(id, taskData, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -73,7 +73,7 @@ export class TaskController {
         try {
             return this.taskService.remove(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 

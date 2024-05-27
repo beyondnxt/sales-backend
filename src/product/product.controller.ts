@@ -13,7 +13,7 @@ export class ProductController {
     try {
       return await this.productService.getProductData();
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
   // @Post()
@@ -21,7 +21,7 @@ export class ProductController {
   //   try {
   //     return await this.productService.create(productData);
   //   } catch (error) {
-  //     throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+  //     throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
   //   }
   // }
 
@@ -33,7 +33,7 @@ export class ProductController {
     try {
       return await this.productService.findAll(page, limit, code, name, model, size, rackNo, brandName);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -42,7 +42,7 @@ export class ProductController {
     try {
       return await this.productService.findOne(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -51,7 +51,7 @@ export class ProductController {
     try {
       return this.productService.update(id, productData);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -60,7 +60,7 @@ export class ProductController {
     try {
       return this.productService.remove(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 }

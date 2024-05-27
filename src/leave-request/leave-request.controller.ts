@@ -13,7 +13,7 @@ export class LeaveRequestController {
     try {
       return this.leaveRequestService.createLeaveRequest(createLeaveDto);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -22,7 +22,7 @@ export class LeaveRequestController {
     try {
       return this.leaveRequestService.findAllLeaveRequests();
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -35,7 +35,7 @@ export class LeaveRequestController {
       }
       return feedback;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -44,7 +44,7 @@ export class LeaveRequestController {
     try {
       return this.leaveRequestService.update(id, createLeaveDto);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -53,7 +53,7 @@ export class LeaveRequestController {
     try {
       return this.leaveRequestService.remove(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 }

@@ -13,7 +13,7 @@ export class CustomerController {
             const userId = req.headers['userid']
             return await this.customerService.create(customerData, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -22,7 +22,7 @@ export class CustomerController {
         try {
             return await this.customerService.findAll(page, limit, name);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -31,7 +31,7 @@ export class CustomerController {
       try {
         return await this.customerService.getCustomerName();
       } catch (error) {
-        throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
       }
     }
 
@@ -44,7 +44,7 @@ export class CustomerController {
             }
             return customer;
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -54,7 +54,7 @@ export class CustomerController {
             const userId = req.headers['userid']
             return await this.customerService.update(id, customerData, userId);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -63,7 +63,7 @@ export class CustomerController {
         try {
             return await this.customerService.remove(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 }

@@ -12,7 +12,7 @@ export class MapLogController {
         try {
             return this.mapLogService.createMapLog(mapLogData);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -22,7 +22,7 @@ export class MapLogController {
         try {
             return this.mapLogService.findAll(page, limit);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -35,7 +35,7 @@ export class MapLogController {
             }
             return feedback;
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -44,7 +44,7 @@ export class MapLogController {
         try {
             return this.mapLogService.update(id, mapLogData);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -53,7 +53,7 @@ export class MapLogController {
         try {
             return this.mapLogService.remove(id);
         } catch (error) {
-            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
 }

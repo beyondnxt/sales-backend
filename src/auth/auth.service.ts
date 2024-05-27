@@ -46,7 +46,7 @@ export class AuthService {
         }
 
         if (user.status !== true) {
-            throw new HttpException({ message: 'User is not active' }, HttpStatus.FORBIDDEN);
+            throw new HttpException({ message: 'User is not active' }, HttpStatus.NOT_FOUND);
         }
 
         const isPasswordMatch = await bcrypt.compare(password, user.password);
@@ -89,7 +89,7 @@ export class AuthService {
             return await this.userRepository.findOne({ where: { id, deleted: false } });
         } catch (error) {
             console.error('Error changing password:', error);
-            throw new InternalServerErrorException('Failed to change password');
+            throw new NotFoundException('Failed to change password');
         }
     }
 
@@ -108,7 +108,7 @@ export class AuthService {
             const user = await this.changePassword(id, password);
             return user;
         } catch (error) {
-            throw new InternalServerErrorException('Failed to reset password');
+            throw new NotFoundException('Failed to reset password');
         }
     }
 

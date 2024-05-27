@@ -13,7 +13,7 @@ export class RoleController {
     try {
       return await this.roleService.getAllRoles(page, limit, name);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -26,7 +26,7 @@ export class RoleController {
       }
       return role;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -35,7 +35,7 @@ export class RoleController {
     try {
       return await this.roleService.createRole(createRoleDto);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
     }
   }
 
@@ -48,7 +48,7 @@ export class RoleController {
       }
       return updatedRole;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -57,7 +57,7 @@ export class RoleController {
     try {
       return await this.roleService.remove(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 }

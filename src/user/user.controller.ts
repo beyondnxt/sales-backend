@@ -10,7 +10,7 @@ export class UserController {
     try {
       return await this.userService.getUsers();
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -20,7 +20,7 @@ export class UserController {
     try {
       return await this.userService.getUsersWithRoles(page, limit, firstName, lastName)
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -33,7 +33,7 @@ export class UserController {
       }
       return user;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -43,7 +43,7 @@ export class UserController {
       const updatedUser = await this.userService.updateUser(id, user);
       return updatedUser;
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
@@ -52,7 +52,7 @@ export class UserController {
     try {
       return await this.userService.deleteUser(id);
     } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
   }
 
