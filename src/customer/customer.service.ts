@@ -43,11 +43,11 @@ export class CustomerService {
     }
 
     async getCustomerName(): Promise<{ data: any[] }> {
-        const role = await this.customerRepository.find({ where: { deleted: false } });
+        const customer = await this.customerRepository.find({ where: { deleted: false } });
         return {
-            data: role.map(role => ({
-                id: role.id,
-                name: role.name
+            data: customer.map(customer => ({
+                id: customer.id,
+                name: customer.name
             })),
         };
     }
