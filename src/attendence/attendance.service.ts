@@ -305,7 +305,7 @@ export class AttendanceService {
   async getLastAttendanceByUserId(userId: number): Promise<Attendance> {
     return this.attendanceRepository.createQueryBuilder('attendance')
       .where('attendance.userId = :userId', { userId })
-      .where('attendance.deleted = :deleted', { deleted: false })
+      .andWhere('attendance.deleted = :deleted', { deleted: false })
       .orderBy('attendance.updatedOn', 'DESC')
       .getOne();
   }
