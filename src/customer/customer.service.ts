@@ -47,7 +47,7 @@ export class CustomerService {
         return {
             data: role.map(role => ({
                 id: role.id,
-                customerName: role.name
+                name: role.name
             })),
         };
     }

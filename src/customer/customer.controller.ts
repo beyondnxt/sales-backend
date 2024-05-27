@@ -18,7 +18,7 @@ export class CustomerController {
     }
 
     @Get()
-    async findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('customerName') name: string): Promise<{ data: Customer[], totalCount: number }> {
+    async findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('name') name: string): Promise<{ data: Customer[], totalCount: number }> {
         try {
             return await this.customerService.findAll(page, limit, name);
         } catch (error) {
