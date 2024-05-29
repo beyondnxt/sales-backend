@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { MapLog } from './entity/map-log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateMapLogDto, LocationDto } from './dto/map-log.dto';
 
 @Injectable()
@@ -54,11 +54,14 @@ export class MapLogService {
         return await this.mapLogRepository.findOne({ where: { id, deleted: false } });
     }
 
-    async update(id: number, locationData: LocationDto): Promise<any> {
+    async update(userId: number, locationData: LocationDto): Promise<any> {
         try {
-            const mapLog = await this.mapLogRepository.findOne({ where: { id, deleted: false } })
+            const currentDate = new Date();
+            const mapLog = await this.mapLogRepository.findOne({ where: { userId, 
+                deleted: false,
+                createdOn: MoreThanOrEqual(new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())) } })
             if (!MapLog) {
-                throw new NotFoundException(`MapLog  with ID ${id} not found`);
+                throw new NotFoundException(`MapLog  with ID ${userId} not found`);
             }
             if (!mapLog.location) {
                 mapLog.location = [];
