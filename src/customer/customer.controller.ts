@@ -19,7 +19,7 @@ export class CustomerController {
 
     @Get()
     async findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('name') name: string,
-    sortOrder: 'ASC' | 'DESC'): Promise<{ data: Customer[], totalCount: number }> {
+        @Query('sortOrder') sortOrder: 'ASC' | 'DESC'): Promise<{ data: Customer[], totalCount: number }> {
         try {
             return await this.customerService.findAll(page, limit, name, sortOrder);
         } catch (error) {
@@ -29,11 +29,11 @@ export class CustomerController {
 
     @Get('/all')
     async getCustomerName(): Promise<{ data: any[] }> {
-      try {
-        return await this.customerService.getCustomerName();
-      } catch (error) {
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
-      }
+        try {
+            return await this.customerService.getCustomerName();
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+        }
     }
 
     @Get(':id')
