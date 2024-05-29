@@ -1,5 +1,6 @@
 import { User } from "src/user/entity/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { LocationDto } from "../dto/map-log.dto";
 
 @Entity({ name: 'maplog' })
 export class MapLog {
@@ -14,7 +15,10 @@ export class MapLog {
     user: User;
 
     @Column({ type: 'simple-json', default: null })
-    location: { [key: string]: any }
+    location: LocationDto[]
+
+    @Column({ default: false })
+    deleted: boolean
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;

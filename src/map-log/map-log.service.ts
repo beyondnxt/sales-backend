@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { MapLog } from './entity/map-log.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateMapLogDto } from './dto/map-log.dto';
+import { CreateMapLogDto, LocationDto } from './dto/map-log.dto';
 
 @Injectable()
 export class MapLogService {
@@ -12,13 +12,26 @@ export class MapLogService {
     ) { }
 
     async createMapLog(mapLogData: CreateMapLogDto): Promise<MapLog> {
-        const newMapLog = this.mapLogRepository.create(mapLogData)
+        if (!mapLogData.location) {
+            mapLogData.location = []
+        }
+        const newLocations: LocationDto[] = mapLogData.location.map(location => ({
+            ...location,
+            createdOn: new Date(),
+        }))
+
+        const newMapLog = this.mapLogRepository.create({
+            ...mapLogData,
+            location: newLocations,
+        });
+
         return await this.mapLogRepository.save(newMapLog);
     }
 
     async findAll(page: number | "all" = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, total: number }> {
 
         let queryBuilder = this.mapLogRepository.createQueryBuilder('mapLog')
+            .where('mapLog.deleted = :deleted', { deleted: false })
             .take(limit);
 
         if (page !== "all") {
@@ -38,16 +51,24 @@ export class MapLogService {
     }
 
     async findMapLogById(id: number): Promise<MapLog> {
-        return await this.mapLogRepository.findOne({ where: { id } });
+        return await this.mapLogRepository.findOne({ where: { id, deleted: false } });
     }
 
-    async update(id: number, mapLogData: MapLog): Promise<MapLog> {
+    async update(id: number, locationData: LocationDto): Promise<any> {
         try {
-            const mapLog = await this.mapLogRepository.findOne({ where: { id } });
+            const mapLog = await this.mapLogRepository.findOne({ where: { id, deleted: false } })
             if (!MapLog) {
                 throw new NotFoundException(`MapLog  with ID ${id} not found`);
             }
-            mapLog.location.push(mapLogData);
+            if (!mapLog.location) {
+                mapLog.location = [];
+            }
+
+            const newLocation: LocationDto = {
+                ...locationData,
+                createdOn: new Date(),
+            } as LocationDto;
+            mapLog.location.push(newLocation);
             return await this.mapLogRepository.save(mapLog);
         } catch (error) {
             throw new Error(`Unable to update MapLog  : ${error.message}`);
@@ -55,11 +76,12 @@ export class MapLogService {
     }
 
     async remove(id: number): Promise<any> {
-        const MapLog = await this.mapLogRepository.findOne({ where: { id } });
-        if (!MapLog) {
-            throw new NotFoundException('MapLog request not found');
+        const mapLog = await this.mapLogRepository.findOne({ where: { id, deleted: false } });
+        if (!mapLog) {
+            throw new NotFoundException('Map log not found');
         }
-        await this.mapLogRepository.remove(MapLog);
+        mapLog.deleted = true
+        await this.mapLogRepository.save(mapLog);
         return { message: `Successfully deleted id ${id}` }
     }
 }

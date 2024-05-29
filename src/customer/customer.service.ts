@@ -75,7 +75,7 @@ export class CustomerService {
     }
 
     async remove(id: number): Promise<any> {
-        const existingCustomer = await this.customerRepository.findOne({ where: { id } });
+        const existingCustomer = await this.customerRepository.findOne({ where: { id, deleted: false } });
         if (!existingCustomer) {
             throw new NotFoundException('Customer not found');
         }

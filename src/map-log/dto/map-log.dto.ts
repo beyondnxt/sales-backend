@@ -1,5 +1,12 @@
-export class CreateMapLogDto{
+export class CreateMapLogDto {
     userId: number
-    location: { [key: string]: any }
+    location: LocationDto[]
+    deleted: boolean
+    createdOn: Date
+}
+
+export class LocationDto {
+    latitude: string
+    logtitude: string
     createdOn: Date
 }
