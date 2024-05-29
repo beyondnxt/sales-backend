@@ -19,8 +19,8 @@ export class AttendanceController {
         return this.attendanceService.getRecordData(userId);
     }
 
-    @Put('updatePunchIn/:userId')
-    updatePunchIn(@Param('userId') userId: number, @Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    @Put('updatePunchIn')
+    updatePunchIn( @Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
             const userId = req.headers['userid'];
             return this.attendanceService.updatePunchIn(createAttendanceDto, userId);
@@ -73,8 +73,8 @@ export class AttendanceController {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
-    @Put('updatePunchOut/:userid')
-    updatePunchOut(@Param('userId') userId: number, @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    @Put('updatePunchOut')
+    updatePunchOut( @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
             const userId = req.headers['userid'];
             return this.attendanceService.updatePunchOut(updateAttendanceDto, userId);

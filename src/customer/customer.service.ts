@@ -17,13 +17,15 @@ export class CustomerService {
         return await this.customerRepository.save(customer);
     }
 
-    async findAll(page: number | 'all' = 1, limit: number = 10, name: string): Promise<{ data: Customer[], fetchedCount: number, totalCount: number }> {
+    async findAll(page: number | 'all' = 1, limit: number = 10, name: string, sortOrder: 'ASC' | 'DESC'): Promise<{ data: Customer[], fetchedCount: number, totalCount: number }> {
         const where: any = {};
         if (name) {
             where.name = Like(`%${name}%`);
         }
         let queryBuilder = this.customerRepository.createQueryBuilder('customer')
             .where('customer.deleted = :deleted', { deleted: false })
+            .orderBy('customer.name', sortOrder)
+            .orderBy('customer.createdOn', sortOrder)
             .andWhere(where);
 
         if (page !== "all") {
