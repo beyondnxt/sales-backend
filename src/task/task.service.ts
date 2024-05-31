@@ -127,16 +127,30 @@ export class TaskService {
     async totalCount(userId: number): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
         const tasks = await this.taskRepository.createQueryBuilder('task')
-            .where('task.assignTo = :userId', { userId: user.id })
+        .where('task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id })
             .getMany()
 
-        let taskStatus = 0
+        let assignedCount = 0
+        let unassignedCount = 0
+        let completedCount = 0
+        let verifiedCount = 0
+        let visitedCount = 0 
         tasks.forEach(task => {
-            if (task.status === 'Assigned') {
-                taskStatus++
-            }
+            if (task.status === 'Assigned ') assignedCount++;
+            if (task.status === 'Unassigned') unassignedCount++;
+            if (task.status === 'Completed') completedCount++;
+            if (task.status === 'verified') verifiedCount++;
+            if (task.status === 'Visit') visitedCount++;
         })
-        return { totalTaskType: taskStatus }
+        return {
+            totalCounts: {
+                Assigned: assignedCount,
+                Unassigned: unassignedCount,
+                Completed: completedCount,
+                Verify: verifiedCount,
+                Visit: visitedCount
+            }
+        };
     }
 
     async findTaskById(id: number): Promise<{ data: any }> {

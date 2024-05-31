@@ -33,8 +33,9 @@ export class TaskController {
     }
 
     @Get('/totalCount')
-    async totalCount(userId: number): Promise<any> {
+    async totalCount(@Req() req: Request): Promise<any> {
         try {
+            const userId = req.headers['userid']
             return await this.taskService.totalCount(userId);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
