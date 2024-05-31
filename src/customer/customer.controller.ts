@@ -19,9 +19,9 @@ export class CustomerController {
 
     @Get()
     async findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10, @Query('name') name: string,
-        @Query('sortOrder') sortOrder: 'ASC' | 'DESC'): Promise<{ data: Customer[], totalCount: number }> {
+        @Query('sortByAsc') sortByAsc, @Query('sortByDes') sortByDes): Promise<{ data: Customer[], totalCount: number }> {
         try {
-            return await this.customerService.findAll(page, limit, name, sortOrder);
+            return await this.customerService.findAll(page, limit, name, sortByAsc, sortByDes);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }

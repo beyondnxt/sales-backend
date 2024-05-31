@@ -17,22 +17,31 @@ export class CustomerService {
         return await this.customerRepository.save(customer);
     }
 
-    async findAll(page: number | 'all' = 1, limit: number = 10, name: string, sortOrder: 'ASC' | 'DESC'): Promise<{ data: Customer[], fetchedCount: number, totalCount: number }> {
+    async findAll(page: number | 'all' = 1, limit: number = 10, name: string, sortByAsc, sortByDes): Promise<{ data: Customer[], fetchedCount: number, totalCount: number }> {
         const where: any = {};
         if (name) {
             where.name = Like(`%${name}%`);
         }
         let queryBuilder = this.customerRepository.createQueryBuilder('customer')
             .where('customer.deleted = :deleted', { deleted: false })
-            .orderBy('customer.name', sortOrder)
-            // .addOrderBy('customer.createdOn', sortOrder)
             .andWhere(where);
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
-
+        if (sortByAsc == "name") {
+            queryBuilder.orderBy('customer.name', 'ASC')
+        }
+        if (sortByDes == "name") {
+            queryBuilder.orderBy('customer.name', 'DESC')
+        }
+        if (sortByAsc == "createdOn") {
+            queryBuilder.orderBy('customer.createdOn', 'ASC')
+        }
+        if (sortByDes == "createdOn") {
+            queryBuilder.orderBy('customer.createdOn', 'DESC')
+        }
         const [customer, totalCount] = await Promise.all([
             queryBuilder.getMany(),
             queryBuilder.getCount()
