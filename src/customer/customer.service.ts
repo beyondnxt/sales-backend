@@ -25,7 +25,7 @@ export class CustomerService {
         let queryBuilder = this.customerRepository.createQueryBuilder('customer')
             .where('customer.deleted = :deleted', { deleted: false })
             .orderBy('customer.name', sortOrder)
-            .orderBy('customer.createdOn', sortOrder)
+            .addOrderBy('customer.createdOn', sortOrder)
             .andWhere(where);
 
         if (page !== "all") {
