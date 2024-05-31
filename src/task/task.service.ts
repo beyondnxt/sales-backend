@@ -31,7 +31,7 @@ export class TaskService {
         if (!user) {
             throw new NotFoundException(`User with ID ${userId} not found`);
         }
-        task.createdBy.userName = user.firstName;
+        task.createdBy.userName = `${user.firstName} ${user.lastName}`;
         return await this.taskRepository.save(task);
     }
 
@@ -88,12 +88,12 @@ export class TaskService {
         const isAdmin = role.name == 'Admin';
         if (!isAdmin) {
             // queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id })
-             queryBuilder = queryBuilder.andWhere(
+            queryBuilder = queryBuilder.andWhere(
                 '(task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId)',
                 { userId: user.id }
             );
         }
-        
+
         const [taskData, totalCount] = await Promise.all([
             queryBuilder.getMany(),
             queryBuilder.getCount()
