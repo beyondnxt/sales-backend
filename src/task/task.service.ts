@@ -106,6 +106,7 @@ export class TaskService {
                 customerName: task.customer ? task.customer.name : null,
                 assignTo: task.assignTo,
                 assignToName: task.user ? task.user.firstName : null,
+                lastName: task.user ? task.user.lastName : null,
                 description: task.description,
                 status: task.status,
                 feedBack: task.feedBack ? task.feedBack : null,
