@@ -40,7 +40,7 @@ export class TaskService {
             taskType: string, status: string
             startDate: Date, assignToName: string, customerName: string,
             userName: string
-        }, userId: number): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        }, userId: number, sortByAsc, sortByDes): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
         if (filters.taskType) {
@@ -98,6 +98,19 @@ export class TaskService {
             queryBuilder.getMany(),
             queryBuilder.getCount()
         ]);
+
+        if (sortByAsc == "taskType") {
+            queryBuilder.orderBy('task.taskType', 'ASC')
+        }
+        if (sortByDes == "taskType") {
+            queryBuilder.orderBy('task.taskType', 'DESC')
+        }
+        if (sortByAsc == "createdOn") {
+            queryBuilder.orderBy('customer.createdOn', 'ASC')
+        }
+        if (sortByDes == "createdOn") {
+            queryBuilder.orderBy('customer.createdOn', 'DESC')
+        }
         return {
             data: taskData.map(task => ({
                 id: task.id,
