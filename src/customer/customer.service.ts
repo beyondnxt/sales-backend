@@ -30,18 +30,14 @@ export class CustomerService {
             const skip = (page - 1) * limit;
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
-        if (sortByAsc == "name") {
-            queryBuilder.orderBy('customer.name', 'ASC')
+
+        if (sortByAsc) {
+            queryBuilder = queryBuilder.orderBy(`customer.${sortByAsc}`, 'ASC');
         }
-        if (sortByDes == "name") {
-            queryBuilder.orderBy('customer.name', 'DESC')
+        if (sortByDes) {
+            queryBuilder = queryBuilder.orderBy(`customer.${sortByDes}`, 'DESC');
         }
-        if (sortByAsc == "createdOn") {
-            queryBuilder.orderBy('customer.createdOn', 'ASC')
-        }
-        if (sortByDes == "createdOn") {
-            queryBuilder.orderBy('customer.createdOn', 'DESC')
-        }
+        
         const [customer, totalCount] = await Promise.all([
             queryBuilder.getMany(),
             queryBuilder.getCount()

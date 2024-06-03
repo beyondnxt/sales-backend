@@ -99,18 +99,13 @@ export class TaskService {
             queryBuilder.getCount()
         ]);
 
-        if (sortByAsc == "taskType") {
-            queryBuilder.orderBy('task.taskType', 'ASC')
+        if (sortByAsc) {
+            queryBuilder = queryBuilder.orderBy(`task.${sortByAsc}`, 'ASC');
         }
-        if (sortByDes == "taskType") {
-            queryBuilder.orderBy('task.taskType', 'DESC')
+        if (sortByDes) {
+            queryBuilder = queryBuilder.orderBy(`task.${sortByDes}`, 'DESC');
         }
-        if (sortByAsc == "createdOn") {
-            queryBuilder.orderBy('customer.createdOn', 'ASC')
-        }
-        if (sortByDes == "createdOn") {
-            queryBuilder.orderBy('customer.createdOn', 'DESC')
-        }
+
         return {
             data: taskData.map(task => ({
                 id: task.id,
@@ -121,7 +116,7 @@ export class TaskService {
                 assignToName: task.user ? `${task.user.firstName} ${task.user.lastName}` : null,
                 description: task.description,
                 status: task.status,
-                feedBack: task.feedBack ? task.feedBack : null,
+                feedBack: task ? task.feedBack : null,
                 location: task.location,
                 followUpDate: task.followUpDate,
                 deleted: task.deleted,
@@ -139,14 +134,14 @@ export class TaskService {
     async totalCount(userId: number): Promise<any> {
         const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
         const tasks = await this.taskRepository.createQueryBuilder('task')
-        .where('task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id })
+            .where('task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id })
             .getMany()
 
         let assignedCount = 0
         let unassignedCount = 0
         let completedCount = 0
         let verifiedCount = 0
-        let visitedCount = 0 
+        let visitedCount = 0
         tasks.forEach(task => {
             if (task.status === 'Assigned ') assignedCount++;
             if (task.status === 'Unassigned') unassignedCount++;
