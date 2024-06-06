@@ -82,6 +82,26 @@ export class TaskService {
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
 
+        if (sortByAsc) {
+            if (sortByAsc.includes('customer.')) {
+                queryBuilder = queryBuilder.orderBy(sortByAsc, 'ASC');
+            } if (sortByAsc.includes('user.')) {
+                queryBuilder = queryBuilder.orderBy(sortByAsc, 'ASC');
+            } else {
+                queryBuilder = queryBuilder.orderBy(`task.${sortByAsc}`, 'ASC');
+            }
+        }
+        if (sortByDes) {
+            if (sortByDes.includes('customer.')) {
+                queryBuilder = queryBuilder.orderBy(sortByDes, 'DESC');
+            } if (sortByDes.includes('user.')) {
+                queryBuilder = queryBuilder.orderBy(sortByDes, 'DESC');
+            } else {
+                queryBuilder = queryBuilder.orderBy(`task.${sortByDes}`, 'DESC');
+            }
+        }
+
+
         const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
         const roleId = user.roleId;
         const role = await this.roleRepository.findOne({ where: { id: roleId, deleted: false } });
@@ -98,13 +118,6 @@ export class TaskService {
             queryBuilder.getMany(),
             queryBuilder.getCount()
         ]);
-
-        if (sortByAsc) {
-            queryBuilder = queryBuilder.orderBy(`task.${sortByAsc}`, 'ASC');
-        }
-        if (sortByDes) {
-            queryBuilder = queryBuilder.orderBy(`task.${sortByDes}`, 'DESC');
-        }
 
         return {
             data: taskData.map(task => ({
