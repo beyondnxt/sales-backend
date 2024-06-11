@@ -205,7 +205,7 @@ export class AttendanceService {
       data: attendances.map(attendance => ({
         id: attendance.id,
         userId: attendance.userId,
-        userName: attendance.user.firstName,
+        userName: attendance.user ? `${attendance.user.firstName} ${attendance.user.lastName}` : null,
         punchIn: attendance.punchIn,
         punchInLocation: attendance.punchInLocation,
         punchOutLocation: attendance.punchOutLocation,
