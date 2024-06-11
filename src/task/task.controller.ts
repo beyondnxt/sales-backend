@@ -24,7 +24,7 @@ export class TaskController {
         @Query('limit') limit: number = 10, @Query('taskType') taskType: string,
         @Query('status') status: string, @Query('startDate') startDate: Date, @Query('assignToName') assignToName: string,
         @Query('customerName') customerName: string, @Query('createdBy') userName: string, @Req() req: Request,
-        @Query('sortByAsc') sortByAsc, @Query('sortByDes') sortByDes): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        @Query('sortByAsc') sortByAsc: string, @Query('sortByDes') sortByDes: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         try {
             const userId = req.headers['userid']
             return await this.taskService.findAll(page, limit, { taskType, status, startDate, assignToName, customerName, userName }, userId,

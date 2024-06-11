@@ -40,7 +40,7 @@ export class TaskService {
             taskType: string, status: string
             startDate: Date, assignToName: string, customerName: string,
             userName: string
-        }, userId: number, sortByAsc, sortByDes): Promise<{ data: any[], total: number, fetchedCount: number }> {
+        }, userId: number, sortByAsc: string, sortByDes: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
 
         if (filters.taskType) {
@@ -82,25 +82,21 @@ export class TaskService {
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
 
+        const sortMap = {
+            customerName: 'customer.name',
+            assignToName: 'user.firstName',
+            userName: 'user.firstName'
+        };
+
         if (sortByAsc) {
-            if (sortByAsc.includes('customer.')) {
-                queryBuilder = queryBuilder.orderBy(sortByAsc, 'ASC');
-            } if (sortByAsc.includes('user.')) {
-                queryBuilder = queryBuilder.orderBy(sortByAsc, 'ASC');
-            } else {
-                queryBuilder = queryBuilder.orderBy(`task.${sortByAsc}`, 'ASC');
-            }
-        }
-        if (sortByDes) {
-            if (sortByDes.includes('customer.')) {
-                queryBuilder = queryBuilder.orderBy(sortByDes, 'DESC');
-            } if (sortByDes.includes('user.')) {
-                queryBuilder = queryBuilder.orderBy(sortByDes, 'DESC');
-            } else {
-                queryBuilder = queryBuilder.orderBy(`task.${sortByDes}`, 'DESC');
-            }
+            const sortField = sortMap[sortByAsc] || `task.${sortByAsc}`;
+            queryBuilder = queryBuilder.orderBy(sortField, 'ASC');
         }
 
+        if (sortByDes) {
+            const sortField = sortMap[sortByDes] || `task.${sortByDes}`;
+            queryBuilder = queryBuilder.orderBy(sortField, 'DESC');
+        }
 
         const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
         const roleId = user.roleId;
