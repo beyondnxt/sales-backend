@@ -189,7 +189,7 @@ export class AttendanceService {
     }
 
     if (filters.userName) {
-      queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `%${filters.userName}%` });
+      queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `${filters.userName}%` });
     }
 
     if (page !== "all") {
@@ -254,7 +254,7 @@ export class AttendanceService {
     }
 
     if (filters.userName) {
-      queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.userName });
+      queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `${filters.userName}%` });
     }
 
     if (page !== "all") {
@@ -269,28 +269,28 @@ export class AttendanceService {
 
     const aggregatedData: Map<number, { userName: string, totalPresent: number, totalAbsent: number, totalLatePunchIn: number, totalEarlyPunchout: number }> = new Map();
     attendances.forEach(attendance => {
-      // if (attendance.user) {  // Ensure the user is not null
-      const userId = attendance.userId;
-      const userName = attendance.user.firstName;
-      if (!aggregatedData.has(userId)) {
-        aggregatedData.set(userId, { userName, totalPresent: 0, totalAbsent: 0, totalLatePunchIn: 0, totalEarlyPunchout: 0 });
-      }
-      if (attendance.status === 'Present') {
-        aggregatedData.get(userId).totalPresent++;
-      } else if (attendance.status === 'Absent') {
-        aggregatedData.get(userId).totalAbsent++;
-      }
+      if (attendance.user) {  // Ensure the user is not null
+        const userId = attendance.userId;
+        const userName = attendance.user.firstName;
+        if (!aggregatedData.has(userId)) {
+          aggregatedData.set(userId, { userName, totalPresent: 0, totalAbsent: 0, totalLatePunchIn: 0, totalEarlyPunchout: 0 });
+        }
+        if (attendance.status === 'Present') {
+          aggregatedData.get(userId).totalPresent++;
+        } else if (attendance.status === 'Absent') {
+          aggregatedData.get(userId).totalAbsent++;
+        }
 
-      if (attendance.punchIn && attendance.punchOut) {
-        const punchInTime = attendance.punchIn.split(":").map(Number)
-        const punchOutTime = attendance.punchOut.split(":").map(Number)
-        if (punchInTime[0] > parseInt(process.env.PUNCHIN_HOURS) || (punchInTime[0] === parseInt(process.env.PUNCHIN_HOURS) && punchInTime[1] > parseInt(process.env.PUNCHIN_MINUTES))) {
-          aggregatedData.get(userId).totalLatePunchIn++;
+        if (attendance.punchIn && attendance.punchOut) {
+          const punchInTime = attendance.punchIn.split(":").map(Number)
+          const punchOutTime = attendance.punchOut.split(":").map(Number)
+          if (punchInTime[0] > parseInt(process.env.PUNCHIN_HOURS) || (punchInTime[0] === parseInt(process.env.PUNCHIN_HOURS) && punchInTime[1] > parseInt(process.env.PUNCHIN_MINUTES))) {
+            aggregatedData.get(userId).totalLatePunchIn++;
+          }
+          if (punchOutTime[0] < parseInt(process.env.PUNCHOUT_HOURS) || (punchOutTime[0] === parseInt(process.env.PUNCHOUT_HOURS) && punchOutTime[1] < parseInt(process.env.PUNCHOUT_MINUTES))) {
+            aggregatedData.get(userId).totalEarlyPunchout++;
+          }
         }
-        if (punchOutTime[0] < parseInt(process.env.PUNCHOUT_HOURS) || (punchOutTime[0] === parseInt(process.env.PUNCHOUT_HOURS) && punchOutTime[1] < parseInt(process.env.PUNCHOUT_MINUTES))) {
-          aggregatedData.get(userId).totalEarlyPunchout++;
-        }
-        // }
       }
     });
 
