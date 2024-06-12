@@ -235,14 +235,23 @@ export class AttendanceService {
     const whereCondition: any = {};
 
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
-      .leftJoinAndSelect('attendance.user', 'user')
+      .leftJoinAndSelect('attendance.user', 'user', 'user.deleted = :deleted', { deleted: false })
       .where('attendance.deleted = :deleted', { deleted: false })
-      .where('user.deleted = :deleted', { deleted: false })
       .andWhere(whereCondition);
+
+    // if (filters.startDate) {
+    //   const startDate = new Date(filters.startDate);
+    //   queryBuilder = queryBuilder.andWhere('MONTH(attendance.createdOn) = :startMonth', { startMonth: startDate.getMonth() + 1 });
+    // }
 
     if (filters.startDate) {
       const startDate = new Date(filters.startDate);
-      queryBuilder = queryBuilder.andWhere('MONTH(attendance.createdOn) = :startMonth', { startMonth: startDate.getMonth() + 1 });
+      const startMonth = startDate.getMonth() + 1;
+      const startYear = startDate.getFullYear();
+      console.log(`Filtering by month: ${startMonth}, year: ${startYear}`);
+      queryBuilder = queryBuilder
+        .andWhere('MONTH(attendance.createdOn) = :startMonth', { startMonth })
+        .andWhere('YEAR(attendance.createdOn) = :startYear', { startYear });
     }
 
     if (filters.userName) {
@@ -258,7 +267,7 @@ export class AttendanceService {
       queryBuilder.getMany(),
       queryBuilder.getCount()
     ]);
-
+    // console.log('attendances', attendances)
     const aggregatedData: Map<number, { userName: string, totalPresent: number, totalAbsent: number, totalLatePunchIn: number, totalEarlyPunchout: number }> = new Map();
     attendances.forEach(attendance => {
       const userId = attendance.userId;
@@ -271,6 +280,7 @@ export class AttendanceService {
       } else if (attendance.status === 'Absent') {
         aggregatedData.get(userId).totalAbsent++;
       }
+      // console.log(aggregatedData.get(userId).totalAbsent++)
       if (attendance.punchIn && attendance.punchOut) {
         const punchInTime = attendance.punchIn.split(":").map(Number)
         const punchOutTime = attendance.punchOut.split(":").map(Number)
@@ -511,12 +521,12 @@ export class AttendanceService {
   }
 
   async delete(id: number): Promise<{ message: string }> {
-    const attendance = await this.roleRepository.findOne({ where: { id, deleted: false } });
+    const attendance = await this.attendanceRepository.findOne({ where: { id, deleted: false } });
     if (!attendance) {
-      throw new NotFoundException(`Role with ID ${id} not found`);
+      throw new NotFoundException(`ID ${id} not found`);
     }
     attendance.deleted = true
-    await this.roleRepository.save(attendance);
+    await this.attendanceRepository.save(attendance);
     return { message: 'successfully deleted' }
   }
 }
