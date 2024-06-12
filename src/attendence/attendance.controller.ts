@@ -20,7 +20,7 @@ export class AttendanceController {
     }
 
     @Put('updatePunchIn')
-    updatePunchIn( @Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    updatePunchIn(@Body() createAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
             const userId = req.headers['userid'];
             return this.attendanceService.updatePunchIn(createAttendanceDto, userId);
@@ -74,7 +74,7 @@ export class AttendanceController {
         }
     }
     @Put('updatePunchOut')
-    updatePunchOut( @Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
+    updatePunchOut(@Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
             const userId = req.headers['userid'];
             return this.attendanceService.updatePunchOut(updateAttendanceDto, userId);
@@ -82,26 +82,26 @@ export class AttendanceController {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
-    
-  @Put('updateMultipleApproval')
-  async updateMultipleApprove(@Body() ids: number[]) {
-    try {
-      const attendance = await this.attendanceService.updateMultipleApproval(ids);
-      return attendance
-    } catch (error) {
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
-    }
-  }
 
-  @Put('updateMultipleReject')
-  async updateMultipleReject(@Body() ids: number[]) {
-    try {
-      const attendance = await this.attendanceService.updateMultipleReject(ids);
-      return attendance
-    } catch (error) {
-        throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    @Put('updateMultipleApproval')
+    async updateMultipleApprove(@Body() ids: number[]) {
+        try {
+            const attendance = await this.attendanceService.updateMultipleApproval(ids);
+            return attendance
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+        }
     }
-  }
+
+    @Put('updateMultipleReject')
+    async updateMultipleReject(@Body() ids: number[]) {
+        try {
+            const attendance = await this.attendanceService.updateMultipleReject(ids);
+            return attendance
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+        }
+    }
 
     @Delete(':id')
     deleteUser(@Param('id') id: number) {

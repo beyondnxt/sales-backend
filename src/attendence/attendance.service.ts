@@ -248,7 +248,6 @@ export class AttendanceService {
       const startDate = new Date(filters.startDate);
       const startMonth = startDate.getMonth() + 1;
       const startYear = startDate.getFullYear();
-      console.log(`Filtering by month: ${startMonth}, year: ${startYear}`);
       queryBuilder = queryBuilder
         .andWhere('MONTH(attendance.createdOn) = :startMonth', { startMonth })
         .andWhere('YEAR(attendance.createdOn) = :startYear', { startYear });
@@ -267,9 +266,10 @@ export class AttendanceService {
       queryBuilder.getMany(),
       queryBuilder.getCount()
     ]);
-    // console.log('attendances', attendances)
+
     const aggregatedData: Map<number, { userName: string, totalPresent: number, totalAbsent: number, totalLatePunchIn: number, totalEarlyPunchout: number }> = new Map();
     attendances.forEach(attendance => {
+      // if (attendance.user) {  // Ensure the user is not null
       const userId = attendance.userId;
       const userName = attendance.user.firstName;
       if (!aggregatedData.has(userId)) {
@@ -280,7 +280,7 @@ export class AttendanceService {
       } else if (attendance.status === 'Absent') {
         aggregatedData.get(userId).totalAbsent++;
       }
-      // console.log(aggregatedData.get(userId).totalAbsent++)
+
       if (attendance.punchIn && attendance.punchOut) {
         const punchInTime = attendance.punchIn.split(":").map(Number)
         const punchOutTime = attendance.punchOut.split(":").map(Number)
@@ -290,6 +290,7 @@ export class AttendanceService {
         if (punchOutTime[0] < parseInt(process.env.PUNCHOUT_HOURS) || (punchOutTime[0] === parseInt(process.env.PUNCHOUT_HOURS) && punchOutTime[1] < parseInt(process.env.PUNCHOUT_MINUTES))) {
           aggregatedData.get(userId).totalEarlyPunchout++;
         }
+        // }
       }
     });
 
