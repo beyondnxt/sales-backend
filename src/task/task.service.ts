@@ -81,11 +81,12 @@ export class TaskService {
             const skip = (page - 1) * limit;
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
+        queryBuilder.addSelect('JSON_EXTRACT(task.createdBy, "$.userName")', 'userName');
 
         const sortMap = {
             customerName: 'customer.name',
             assignToName: 'user.firstName',
-            userName: 'user.firstName'
+            userName: 'userName'
         };
 
         if (sortByAsc) {
