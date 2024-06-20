@@ -153,7 +153,7 @@ export class TaskService {
         let verifiedCount = 0
         let visitedCount = 0
         tasks.forEach(task => {
-            if (task.status === 'Assigned ') assignedCount++;
+            if (task.status === 'Assigned') assignedCount++;
             if (task.status === 'Unassigned') unassignedCount++;
             if (task.status === 'Completed') completedCount++;
             if (task.status === 'verified') verifiedCount++;

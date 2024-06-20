@@ -24,7 +24,7 @@ export class Task {
     @JoinColumn({ name: 'assignTo' })
     user: User;
 
-    @Column({ default: null })
+    @Column({ default: null, length: 500 })
     description: string
 
     @Column({ default: null })

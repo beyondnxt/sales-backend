@@ -176,9 +176,8 @@ export class AttendanceService {
     }
 
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
-      .leftJoinAndSelect('attendance.user', 'user')
+      .leftJoinAndSelect('attendance.user', 'user', 'user.deleted = :deleted', { deleted: false })
       .where('attendance.deleted = :deleted', { deleted: false })
-      .where('user.deleted = :deleted', { deleted: false })
       .andWhere(whereCondition)
       .orderBy('attendance.createdOn', 'DESC')
       .take(limit)
