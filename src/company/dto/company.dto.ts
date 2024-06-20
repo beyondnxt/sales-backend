@@ -3,7 +3,6 @@ export class CreateCompanyDto {
     location: string
     openingTime: string
     closingTime: string
-    actions: string
     deleted: boolean
     createdOn: Date
     createdBy: { [key: string]: any }

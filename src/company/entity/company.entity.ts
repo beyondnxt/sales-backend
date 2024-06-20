@@ -19,9 +19,6 @@ export class Company {
     @Column({ default: null })
     closingTime: string
 
-    @Column({ default: null })
-    actions: string
-
     @Column({ default: false })
     deleted: boolean
 
