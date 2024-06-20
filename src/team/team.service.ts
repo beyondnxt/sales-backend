@@ -29,14 +29,35 @@ export class TeamService {
         return await this.teamRepository.save(team);
     }
 
-    async findAll(page: number = 1, limit: number = 10): Promise<{ data: any, totalCount: number }> {
-        const [data, totalCount] = await this.teamRepository.findAndCount({
-            where: { deleted: false },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
-        return { data, totalCount };
+    async findAll(page: number = 1, limit: number = 10): Promise<{ data: any, fetchedCount: number, totalCount: number }> {
+        const where: any = { deleted: false };
+
+        const queryBuilder = this.teamRepository.createQueryBuilder('team')
+            .where(where)
+            .skip((page - 1) * limit)
+            .take(limit);
+
+        const [teams, totalCount] = await Promise.all([
+            queryBuilder.getMany(),
+            queryBuilder.getCount()
+        ]);
+
+        return {
+            data: teams.map(team => ({
+                id: team.id,
+                teamName: team.teamName,
+                deleted: team.deleted,
+                createdOn: team.createdOn,
+                createdBy: team.createdBy,
+                userName: team.createdBy.userName,
+                updatedOn: team.updatedOn,
+                updatedBy: team.updatedBy
+            })),
+            fetchedCount: teams.length,
+            totalCount: totalCount
+        };
     }
+
 
     async findOne(id: number): Promise<Team> {
         const team = await this.teamRepository.findOne({ where: { id, deleted: false } });
