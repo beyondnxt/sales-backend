@@ -30,10 +30,11 @@ export class TeamService {
     }
 
     async findAll(page: number = 1, limit: number = 10): Promise<{ data: any, fetchedCount: number, totalCount: number }> {
-        const where: any = { deleted: false };
+        const where: any = {};
 
         const queryBuilder = this.teamRepository.createQueryBuilder('team')
-            .where(where)
+            .where('team.deleted = :deleted', { deleted: false })
+            .andWhere(where)
             .skip((page - 1) * limit)
             .take(limit);
 
@@ -57,7 +58,6 @@ export class TeamService {
             totalCount: totalCount
         };
     }
-
 
     async findOne(id: number): Promise<Team> {
         const team = await this.teamRepository.findOne({ where: { id, deleted: false } });
