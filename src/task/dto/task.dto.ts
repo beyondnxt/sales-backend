@@ -7,8 +7,8 @@ export class CreateTaskDto {
     feedBack: { [key: string]: any };
     location: string
     followUpDate: Date
-    latitude: number
-    longitude: number
+    latitude: string
+    longitude: string
     deleted: boolean
     createdOn: Date
     createdBy: { [key: string]: any }

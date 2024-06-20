@@ -15,6 +15,6 @@ export class CreateAttendanceDto{
     createdOn: Date
     updatedBy: number
     updatedOn: Date
-    latitude: number
-    longitude: number
+    latitude: string
+    longitude: string
 }

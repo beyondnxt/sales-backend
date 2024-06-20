@@ -366,11 +366,11 @@ export class AttendanceService {
       .getOne();
 
     const userTask: any = await this.taskRepository.createQueryBuilder('task')
-      .leftJoinAndSelect('task.customer', 'customer')
-      .leftJoinAndSelect('task.user', 'user')
-      .where('task.assignTo = :userId', { userId: attendance.userId })
-      .andWhere('task.deleted = :deleted', { deleted: false })
-      .andWhere('user.deleted = :deleted', { deleted: false })
+      .where('task.deleted = :deleted', { deleted: false })
+      .leftJoinAndSelect('task.customer', 'customer', 'customer.deleted = :deleted', { deleted: false })
+      .leftJoinAndSelect('task.user', 'user', 'user.deleted = :deleted', { deleted: false })
+      // .andWhere('task.assignTo = :userId', { userId: attendance.userId })
+      .andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, "$.userId")) = :userId', { userId: attendance.userId })
       .andWhere('DATE(task.createdOn) = :date', { date: formattedDate })
       .getMany();
     return {
@@ -395,7 +395,9 @@ export class AttendanceService {
           customerName: task.customer.name,
           location: this.formatCoordinates(task.location),
           taskType: task.taskType,
-          createdOn: task.createdOn
+          status: task.status,
+          createdOn: task.createdOn,
+          createdBy: task.createdBy
         })),
       }
     };
