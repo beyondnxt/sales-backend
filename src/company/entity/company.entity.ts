@@ -10,17 +10,17 @@ export class Company {
     @Column()
     companyName: string
 
-    @Column({ type: 'simple-json', default: null })
-    address: { [key: string]: any }
+    @Column({ default: null })
+    location: string
 
     @Column({ default: null })
-    email: string
+    openingTime: string
 
-    @Column()
-    phoneNo: string
+    @Column({ default: null })
+    closingTime: string
 
-    @Column()
-    location: string
+    @Column({ default: null })
+    actions: string
 
     @Column({ default: false })
     deleted: boolean
@@ -28,8 +28,8 @@ export class Company {
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
     createdOn: Date;
 
-    @Column({ default: null })
-    createdBy: number
+    @Column({ type: 'simple-json', default: null })
+    createdBy: { [key: string]: any };
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
     updatedOn: Date;
