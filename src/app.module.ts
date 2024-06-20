@@ -29,6 +29,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MapLogModule } from './map-log/map-log.module';
 import { MapLog } from './map-log/entity/map-log.entity';
 import { AuthenticationMiddleware } from './common/middleware/authentication.middleware';
+import { TeamModule } from './team/team.module';
+import { Team } from './team/entity/team.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -42,7 +44,8 @@ import { AuthenticationMiddleware } from './common/middleware/authentication.mid
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, Task, MapLog],
+      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, 
+        Task, MapLog, Team],
       synchronize: true,
     }),
     inject: [ConfigService],
@@ -58,7 +61,8 @@ import { AuthenticationMiddleware } from './common/middleware/authentication.mid
     ExpenseModule,
     CompanyModule,
     TaskModule,
-    MapLogModule
+    MapLogModule,
+    TeamModule
   ],
   controllers: [AppController],
   providers: [AppService,
