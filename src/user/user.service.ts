@@ -51,6 +51,7 @@ export class UserService {
                 id: user.id,
                 firstName: user.firstName,
                 lastName: user.lastName,
+                userName: user ? `${user.firstName} ${user.lastName}` : null,
                 phoneNumber: user.phoneNumber,
                 email: user.email,
                 roleId: user.roleId,
