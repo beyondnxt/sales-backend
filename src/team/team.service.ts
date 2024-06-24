@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
@@ -18,6 +18,10 @@ export class TeamService {
         const user = await this.userRepository.findOne({ where: { id: userId } });
         if (!user) {
             throw new NotFoundException(`User with ID ${userId} not found`);
+        }
+        const existingName = await this.teamRepository.findOne({ where: { teamName: teamData.teamName, deleted: false } });
+        if (existingName) {
+            throw new BadRequestException('Team name already exists');
         }
         const team = this.teamRepository.create({
             ...teamData,
