@@ -1,6 +1,6 @@
-import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
@@ -17,30 +17,12 @@ export class AuthService {
     ) { }
 
     async signUp(signUpDto: CreateUserDto): Promise<any> {
-        const { firstName, lastName, phoneNumber, email, password, roleId, companyId, teamId, status, deleted } = signUpDto;
-        const existingEmail = await this.userRepository.findOne({ where: { email, deleted: false } });
-        if (existingEmail) {
-            throw new BadRequestException('Email already exists');
-        }
-        const existingPhone = await this.userRepository.findOne({ where: { phoneNumber, deleted: false } });
-        if (existingPhone) {
-            throw new BadRequestException('Phone number already exists');
-        }
-        const existingUser = await this.userRepository.findOne({
-            where: {
-                firstName: signUpDto.firstName,
-                lastName: signUpDto.lastName,
-                deleted: false
-            }
-        });
+        const { firstName, lastName, phoneNumber, email, password, roleId, companyId, status, deleted } = signUpDto;
+        const existingUser = await this.userRepository.findOne({ where: { email, deleted: false } });
         if (existingUser) {
-            throw new BadRequestException('First name and last name already exists');
+            throw new UnauthorizedException('Email already exists');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
-        const teams = await this.teamRepository.find({ where: { id: In(teamId), deleted: false } });
-        if (teams.length !== teamId.length) {
-            throw new NotFoundException(`Invalid id`);
-        }
         const user = await this.userRepository.create({
             firstName,
             lastName,
@@ -49,7 +31,6 @@ export class AuthService {
             password: hashedPassword,
             roleId,
             companyId,
-            team: teams,
             status,
             deleted
         });
@@ -91,8 +72,7 @@ export class AuthService {
 
     async getUserInfo(id: number): Promise<any> {
         const user = await this.userRepository.createQueryBuilder('user')
-            .select(['user.id', 'user.firstName', 'user.lastName', 'user.phoneNumber',
-                'user.email', 'user.roleId', 'user.status', 'user.team'])
+            .select(['user.id', 'user.firstName', 'user.lastName', 'user.phoneNumber', 'user.email', 'user.roleId', 'user.status'])
             .where('user.id = :id', { id })
             .andWhere('user.deleted = :deleted', { deleted: false })
             .getOne();

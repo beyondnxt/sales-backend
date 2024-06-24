@@ -1,5 +1,4 @@
-import { User } from "src/user/entity/user.entity";
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'team' })
 export class Team {
@@ -23,7 +22,4 @@ export class Team {
 
     @Column({ default: null })
     updatedBy: number
-
-    @ManyToMany(() => User, user => user.team)
-    user: User[];
 }

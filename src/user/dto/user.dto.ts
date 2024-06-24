@@ -1,4 +1,4 @@
-import { IsEmail, IsInt, IsNotEmpty, IsString } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateUserDto {
   firstName: string
@@ -8,8 +8,6 @@ export class CreateUserDto {
   password: string
   roleId: number
   companyId: number
-  @IsInt({ each: true })
-  teamId: number[];
   status: boolean
   deleted: boolean
   createdOn: Date
