@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/entity/user.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { PassportModule } from '@nestjs/passport';
+import { Team } from 'src/team/entity/team.entity';
 
 @Module({
   imports: [PassportModule.register({ defaultStrategy: 'jwt' }),
@@ -18,7 +19,7 @@ import { PassportModule } from '@nestjs/passport';
       signOptions: { expiresIn: config.get<string | number>('JWT_EXPIRES') },
     }),
   }),
-  TypeOrmModule.forFeature([User, Role])],
+  TypeOrmModule.forFeature([User, Role, Team])],
   providers: [AuthService],
   controllers: [AuthController]
 })

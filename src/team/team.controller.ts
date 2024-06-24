@@ -17,6 +17,15 @@ export class TeamController {
         }
     }
 
+    @Get('/all')
+    async getTeamName(): Promise<{ data: any[] }> {
+        try {
+            return await this.teamService.getTeamName();
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @Get()
     async findAll(@Query('page') page: number = 1, @Query('limit') limit: number = 10): Promise<{ data: any, totalCount: number }> {
         try {

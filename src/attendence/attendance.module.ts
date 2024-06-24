@@ -10,9 +10,10 @@ import { MapLog } from 'src/map-log/entity/map-log.entity';
 import { Task } from 'src/task/entity/task.entity';
 import { WebsocketGateway } from 'src/gateway/websocket.gateway';
 import { UserService } from 'src/user/user.service';
+import { Team } from 'src/team/entity/team.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Attendance, User, Company, Role, MapLog, Task])],
+  imports: [TypeOrmModule.forFeature([Attendance, User, Company, Role, MapLog, Task, Team])],
   providers: [AttendanceService, WebsocketGateway, UserService],
   controllers: [AttendanceController]
 })

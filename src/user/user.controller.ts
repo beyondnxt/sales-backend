@@ -1,6 +1,7 @@
 import { Controller, Get, Param, NotFoundException, Delete, Put, Body, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
+import { CreateUserDto } from './dto/user.dto';
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) { }
@@ -38,9 +39,9 @@ export class UserController {
   }
 
   @Put(':id')
-  async updateUser(@Param('id') id: number, @Body() user: User): Promise<User> {
+  async updateUser(@Param('id') id: number, @Body() updateUserDto: CreateUserDto): Promise<User> {
     try {
-      const updatedUser = await this.userService.updateUser(id, user);
+      const updatedUser = await this.userService.updateUser(id, updateUserDto);
       return updatedUser;
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.NOT_FOUND);

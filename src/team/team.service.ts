@@ -59,6 +59,16 @@ export class TeamService {
         };
     }
 
+    async getTeamName(): Promise<{ data: any[] }> {
+        const teams = await this.teamRepository.find({ where: { deleted: false } });
+        return {
+            data: teams.map(team => ({
+                id: team.id,
+                teamName: team.teamName,
+            })),
+        };
+    }
+
     async findOne(id: number): Promise<Team> {
         const team = await this.teamRepository.findOne({ where: { id, deleted: false } });
         if (!team) {

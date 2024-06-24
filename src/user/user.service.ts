@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { Like, Not, Repository } from "typeorm";
+import { In, Like, Not, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
+import { Team } from "src/team/entity/team.entity";
+import { CreateUserDto } from "./dto/user.dto";
 
 @Injectable()
 export class UserService {
     constructor(@InjectRepository(User)
-    private readonly userRepository: Repository<User>
+    private readonly userRepository: Repository<User>,
+        @InjectRepository(Team)
+        private readonly teamRepository: Repository<Team>
     ) { }
 
     async doesUserExist(userId: any) {
-        const user = await this.userRepository.findOne({ where: { id: userId } });
+        const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } });
         return user;
     }
 
@@ -25,8 +29,9 @@ export class UserService {
         }
 
         let queryBuilder = this.userRepository.createQueryBuilder('user')
-            .leftJoinAndSelect('user.role', 'role')
-            .leftJoinAndSelect('user.company', 'company')
+            .leftJoinAndSelect('user.role', 'role', 'role.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('user.company', 'company', 'company.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('user.team', 'team', 'team.deleted = :deleted', { deleted: false })
             .where('user.deleted = :deleted', { deleted: false })
             .take(limit)
             .andWhere(where);
@@ -52,6 +57,7 @@ export class UserService {
                 roleName: user.role.name,
                 companyId: user.companyId,
                 companyName: user.company.companyName,
+                teamId: user.team.map(team => ({ id: team.id, teamName: team.teamName })),
                 createdOn: user.createdOn,
                 status: user.status,
                 deleted: user.deleted
@@ -59,6 +65,7 @@ export class UserService {
             total: totalCount
         };
     }
+
     async getUsers(): Promise<{ data: any[] }> {
         const users = await this.userRepository.find({ where: { deleted: false } });
         return {
@@ -82,16 +89,26 @@ export class UserService {
         }
     }
 
-    async updateUser(id: number, user: User): Promise<any> {
+    async updateUser(id: number, updateUserDto: CreateUserDto): Promise<User> {
         const existingUser = await this.userRepository.findOne({ where: { id, deleted: false } });
         if (!existingUser) {
             throw new NotFoundException(`User with id ${id} not found`);
         }
-        Object.assign(existingUser, user);
-        const userWithSameEmail = await this.userRepository.findOne({ where: { email: user.email, id: Not(id) } });
-        if (userWithSameEmail) {
-            throw new NotFoundException(`Email already exists`)
+        if (updateUserDto.teamId) {
+            const teams = await this.teamRepository.find({ where: { id: In(updateUserDto.teamId), deleted: false } });
+            if (teams.length !== updateUserDto.teamId.length) {
+                throw new NotFoundException(`Invalid id`);
+            }
         }
+        if (updateUserDto.email) {
+            const userWithSameEmail = await this.userRepository.findOne({ where: { email: updateUserDto.email, id: Not(id), deleted: false } });
+            if (userWithSameEmail) {
+                throw new NotFoundException(`Email already exists`);
+            }
+        }
+
+        Object.assign(existingUser, updateUserDto);
+
         return await this.userRepository.save(existingUser);
     }
 

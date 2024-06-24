@@ -5,7 +5,8 @@ import { LeaveRequest } from 'src/leave-request/entity/leave-request.entity';
 import { MapLog } from 'src/map-log/entity/map-log.entity';
 import { Role } from 'src/role/entity/role.entity';
 import { Task } from 'src/task/entity/task.entity';
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Team } from 'src/team/entity/team.entity';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, JoinTable, ManyToMany } from 'typeorm';
 
 @Entity({ name: 'user' })
 export class User {
@@ -46,10 +47,18 @@ export class User {
     @JoinColumn({ name: 'companyId' })
     company: Company
 
+    @ManyToMany(() => Team, team => team.user)
+    @JoinTable({
+        name: 'user-team', // Table name for the join table
+        joinColumn: { name: 'userId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'teamId', referencedColumnName: 'id' }
+    })
+    team: Team[];
+
     @Column()
     status: boolean
 
-    @Column({default: false})
+    @Column({ default: false })
     deleted: boolean
 
     @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

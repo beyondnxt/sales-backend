@@ -1,25 +1,32 @@
 import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User } from 'src/user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { CreateUserDto, userCreated } from 'src/user/dto/user.dto';
 import * as nodemailer from 'nodemailer';
+import { Team } from 'src/team/entity/team.entity';
 
 @Injectable()
 export class AuthService {
     constructor(@InjectRepository(User)
-    private readonly userRepository: Repository<User>, private readonly jwtService: JwtService
+    private readonly userRepository: Repository<User>, private readonly jwtService: JwtService,
+        @InjectRepository(Team)
+        private teamRepository: Repository<Team>
     ) { }
 
     async signUp(signUpDto: CreateUserDto): Promise<any> {
-        const { firstName, lastName, phoneNumber, email, password, roleId, companyId, status, deleted } = signUpDto;
+        const { firstName, lastName, phoneNumber, email, password, roleId, companyId, teamId, status, deleted } = signUpDto;
         const existingUser = await this.userRepository.findOne({ where: { email, deleted: false } });
         if (existingUser) {
             throw new UnauthorizedException('Email already exists');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
+        const teams = await this.teamRepository.find({ where: { id: In(teamId), deleted: false } });
+        if (teams.length !== teamId.length) {
+            throw new NotFoundException(`Invalid id`);
+        }
         const user = await this.userRepository.create({
             firstName,
             lastName,
@@ -28,6 +35,7 @@ export class AuthService {
             password: hashedPassword,
             roleId,
             companyId,
+            team: teams,
             status,
             deleted
         });
@@ -55,13 +63,13 @@ export class AuthService {
         }
 
         const token = this.jwtService.sign({ id: user.id });
-        const userData = { 
-            userId: user.id, 
+        const userData = {
+            userId: user.id,
             userName: user.firstName,
-            lastName: user.lastName, 
-            roleId: user.roleId, 
-            roleName: user.role.name, 
-            token: token 
+            lastName: user.lastName,
+            roleId: user.roleId,
+            roleName: user.role.name,
+            token: token
         };
 
         return { statusCode: HttpStatus.OK, data: userData };
@@ -69,7 +77,8 @@ export class AuthService {
 
     async getUserInfo(id: number): Promise<any> {
         const user = await this.userRepository.createQueryBuilder('user')
-            .select(['user.id', 'user.firstName', 'user.lastName', 'user.phoneNumber', 'user.email', 'user.roleId', 'user.status'])
+            .select(['user.id', 'user.firstName', 'user.lastName', 'user.phoneNumber',
+                'user.email', 'user.roleId', 'user.status', 'user.team'])
             .where('user.id = :id', { id })
             .andWhere('user.deleted = :deleted', { deleted: false })
             .getOne();
