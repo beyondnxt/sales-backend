@@ -41,12 +41,13 @@ export class CompanyService {
         return { data, totalCount };
     }
 
-    async findOne(id: number): Promise<Company> {
+    async findOne(id: number): Promise<any> {
         const company = await this.companyRepository.findOne({ where: { id, deleted: false } });
         if (!company) {
             throw new NotFoundException('company not found');
         }
-        return company;
+        const users = await this.userRepository.find({ where: { companyId: company.id } });
+        return { company, users };
     }
 
     async update(id: number, companyData: CreateCompanyDto, userId): Promise<Company> {
