@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -18,9 +18,23 @@ export class AuthService {
 
     async signUp(signUpDto: CreateUserDto): Promise<any> {
         const { firstName, lastName, phoneNumber, email, password, roleId, companyId, teamId, status, deleted } = signUpDto;
-        const existingUser = await this.userRepository.findOne({ where: { email, deleted: false } });
+        const existingEmail = await this.userRepository.findOne({ where: { email, deleted: false } });
+        if (existingEmail) {
+            throw new BadRequestException('Email already exists');
+        }
+        const existingPhone = await this.userRepository.findOne({ where: { phoneNumber, deleted: false } });
+        if (existingPhone) {
+            throw new BadRequestException('Phone number already exists');
+        }
+        const existingUser = await this.userRepository.findOne({
+            where: {
+                firstName: signUpDto.firstName,
+                lastName: signUpDto.lastName,
+                deleted: false
+            }
+        });
         if (existingUser) {
-            throw new UnauthorizedException('Email already exists');
+            throw new BadRequestException('First name and last name already exists');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const teams = await this.teamRepository.find({ where: { id: In(teamId), deleted: false } });

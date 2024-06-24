@@ -59,6 +59,7 @@ export class UserService {
                 companyId: user.companyId,
                 companyName: user.company.companyName,
                 teamId: user.team.map(team => ({ id: team.id, teamName: team.teamName })),
+                teamName: user.team.map(team => team.teamName).join(', '),
                 createdOn: user.createdOn,
                 createdBy: user.createdBy,
                 status: user.status,
