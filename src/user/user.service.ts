@@ -4,13 +4,16 @@ import { In, Like, Not, Repository } from "typeorm";
 import { User } from "./entity/user.entity";
 import { Team } from "src/team/entity/team.entity";
 import { CreateUserDto } from "./dto/user.dto";
+import { Task } from "src/task/entity/task.entity";
 
 @Injectable()
 export class UserService {
     constructor(@InjectRepository(User)
     private readonly userRepository: Repository<User>,
         @InjectRepository(Team)
-        private readonly teamRepository: Repository<Team>
+        private readonly teamRepository: Repository<Team>,
+        @InjectRepository(Task)
+        private readonly taskRepository: Repository<Task>
     ) { }
 
     async doesUserExist(userId: any) {
@@ -82,13 +85,18 @@ export class UserService {
         };
     }
 
-    async getUserById(userId: number): Promise<User | undefined> {
+    async getUserById(id: number): Promise<any> {
         try {
-            const user = this.userRepository.findOne({ where: { id: userId, deleted: false } });
+            const user = await this.userRepository.findOne({ where: { id, deleted: false } });
             if (!user) {
-                throw new NotFoundException('User not found');
+                throw new NotFoundException(`User id ${id} not found`);
             }
-            return user;
+            const tasks = await this.taskRepository.createQueryBuilder('task')
+                .where('task.assignTo = :id', { id })
+                .andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id })
+                .getMany();
+
+            return { user, tasks };
         } catch (error) {
             throw new Error(`Unable to fetch User: ${error.message}`);
         }

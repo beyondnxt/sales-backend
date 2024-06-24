@@ -6,9 +6,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserController } from './user.controller';
 import { LeaveRequest } from 'src/leave-request/entity/leave-request.entity';
 import { Team } from 'src/team/entity/team.entity';
+import { Task } from 'src/task/entity/task.entity';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User, Role, LeaveRequest, Team])],
+    imports: [TypeOrmModule.forFeature([User, Role, LeaveRequest, Team, Task])],
     providers: [UserService],
     controllers: [UserController],
     exports:[UserService]

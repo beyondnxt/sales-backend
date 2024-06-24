@@ -1,4 +1,4 @@
-import { Controller, Get, Param, NotFoundException, Delete, Put, Body, HttpException, HttpStatus, Query } from '@nestjs/common';
+import { Controller, Get, Param, Delete, Put, Body, HttpException, HttpStatus, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entity/user.entity';
 import { CreateUserDto } from './dto/user.dto';
@@ -26,13 +26,9 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUserById(@Param('id') userId: number) {
+  async getUserById(@Param('id') id: number) {
     try {
-      const user = await this.userService.getUserById(userId);
-      if (!user) {
-        throw new NotFoundException(`User with ID ${userId} not found`);
-      }
-      return user;
+      return await this.userService.getUserById(id);
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }
