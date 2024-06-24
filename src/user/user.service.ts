@@ -60,8 +60,11 @@ export class UserService {
                 companyName: user.company.companyName,
                 teamId: user.team.map(team => ({ id: team.id, teamName: team.teamName })),
                 createdOn: user.createdOn,
+                createdBy: user.createdBy,
                 status: user.status,
-                deleted: user.deleted
+                deleted: user.deleted,
+                updatedBy: user.updatedBy,
+                updatedOn: user.updatedOn
             })),
             total: totalCount
         };
