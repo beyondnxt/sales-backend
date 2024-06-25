@@ -31,6 +31,7 @@ export class UserService {
             .leftJoinAndSelect('user.role', 'role', 'role.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('user.company', 'company', 'company.deleted = :deleted', { deleted: false })
             .where('user.deleted = :deleted', { deleted: false })
+            .orderBy('user.createdOn', 'DESC')
             .take(limit)
             .andWhere(where);
 

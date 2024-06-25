@@ -29,7 +29,7 @@ export class AttendanceService {
     private appGateway: WebsocketGateway,
   ) { }
 
-  @Cron('0 0 6 * * *')
+  @Cron('0 45 9 * * *')
   async handleAttendanceUpdate() {
     try {
       const currentDate = new Date();
