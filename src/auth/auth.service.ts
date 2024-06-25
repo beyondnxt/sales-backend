@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -20,7 +20,7 @@ export class AuthService {
         const { firstName, lastName, phoneNumber, email, password, roleId, companyId, status, deleted } = signUpDto;
         const existingUser = await this.userRepository.findOne({ where: { email, deleted: false } });
         if (existingUser) {
-            return { message: 'Email already exists' };
+            throw new BadRequestException('Email already exists');
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await this.userRepository.create({
