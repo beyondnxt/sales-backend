@@ -173,11 +173,9 @@ export class TaskService {
     async findTaskById(id: number): Promise<{ data: any }> {
         const task = await this.taskRepository.createQueryBuilder('task')
             .where('task.deleted = :deleted', { deleted: false })
-            .leftJoinAndSelect('task.user', 'user')
-            .where('user.deleted = :deleted', { deleted: false })
-            .leftJoinAndSelect('task.customer', 'customer')
-            .where('customer.deleted = :deleted', { deleted: false })
-            .where('task.id = :id', { id })
+            .leftJoinAndSelect('task.user', 'user', 'user.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('task.customer', 'customer', 'customer.deleted = :deleted', { deleted: false })
+            .andWhere('task.id = :id', { id })
             .getOne();
         if (!task) {
             throw new NotFoundException(`task with ID ${id} not found`);
