@@ -191,6 +191,11 @@ export class AttendanceService {
       queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `${filters.userName}%` });
     }
 
+    if (filters.isNotify === 'true') {
+      const currentDate = new Date().toISOString().split('T')[0]; // Get current date in 'YYYY-MM-DD' format
+      queryBuilder = queryBuilder.andWhere('DATE(attendance.createdOn) != :currentDate', { currentDate });
+    }
+
     if (page !== "all") {
       const skip = (page - 1) * limit;
       queryBuilder = queryBuilder.skip(skip).take(limit);
