@@ -1,8 +1,9 @@
-export class CreateCompanyDto {
+export class CreateCompanyDto{
     companyName: string
+    address: { [key: string]: any }
+    email: string
+    phoneNo: string
     location: string
-    openingTime: string
-    closingTime: string
     deleted: boolean
     createdOn: Date
     createdBy: { [key: string]: any }

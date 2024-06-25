@@ -10,14 +10,17 @@ export class Company {
     @Column()
     companyName: string
 
+    @Column({ type: 'simple-json', default: null })
+    address: { [key: string]: any }
+
     @Column({ default: null })
+    email: string
+
+    @Column()
+    phoneNo: string
+
+    @Column()
     location: string
-
-    @Column({ default: null })
-    openingTime: string
-
-    @Column({ default: null })
-    closingTime: string
 
     @Column({ default: false })
     deleted: boolean

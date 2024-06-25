@@ -32,7 +32,7 @@ export class CompanyService {
         return await this.companyRepository.save(company);
     }
 
-    async findAll(page: number = 1, limit: number = 10): Promise<{ data: any, totalCount: number }> {
+    async findAll(page: number = 1, limit: number = 10): Promise<{ data: Company[], totalCount: number }> {
         const [data, totalCount] = await this.companyRepository.findAndCount({
             where: { deleted: false },
             skip: (page - 1) * limit,
@@ -41,13 +41,12 @@ export class CompanyService {
         return { data, totalCount };
     }
 
-    async findOne(id: number): Promise<any> {
+    async findOne(id: number): Promise<Company> {
         const company = await this.companyRepository.findOne({ where: { id, deleted: false } });
         if (!company) {
             throw new NotFoundException('company not found');
         }
-        const users = await this.userRepository.find({ where: { companyId: company.id } });
-        return { company, users };
+        return company;
     }
 
     async update(id: number, companyData: CreateCompanyDto, userId): Promise<Company> {
