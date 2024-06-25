@@ -363,7 +363,7 @@ export class AttendanceService {
       .where('mapLog.userId = :userId', { userId: attendance.userId })
       .andWhere('user.deleted = :deleted', { deleted: false })
       .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
-      .getOne();
+      .getMany();
 
     const userTask: any = await this.taskRepository.createQueryBuilder('task')
       .where('task.deleted = :deleted', { deleted: false })
@@ -384,12 +384,11 @@ export class AttendanceService {
           punchOut: this.formatCoordinates(attendance.punchOutLocation),
           createdOn: attendance.createdOn
         }],
-        mapLog: usermap ? [{
-          // userId: usermap.userId,
-          userName: usermap.user.firstName,
-          location: usermap.location,
-          createdOn: usermap.createdOn
-        }] : [],
+        mapLog: usermap ? usermap.map(log => ({
+          userName: log.user.firstName,
+          location: log.location,
+          createdOn: log.createdOn,
+        })) : null,
         task: userTask.map(task => ({
           userId: task.assignTo,
           customerName: task.customer.name,
