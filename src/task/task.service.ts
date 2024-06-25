@@ -189,7 +189,7 @@ export class TaskService {
                 customerId: task.customerId,
                 customerName: task.customer ? task.customer.name : null,
                 assignTo: task.assignTo,
-                assignToName: task.user ? task.user.firstName : null,
+                assignToName: task.user ? `${task.user.firstName} ${task.user.lastName}` : null,
                 description: task.description,
                 status: task.status,
                 feedBack: task.feedBack ? task.feedBack : null,
