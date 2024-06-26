@@ -42,7 +42,7 @@ export class TaskService {
             userName: string
         }, userId: number, sortByAsc: string, sortByDes: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
-
+            // console.log('45------', JSON.stringify(filters));
         if (filters.taskType) {
             where.taskType = filters.taskType;
         }
@@ -112,7 +112,7 @@ export class TaskService {
         //     );
         // }
         if (!isAdmin) {
-            if (filters.taskType === 'Unassigned') {
+            if (filters.status.toLowerCase() === 'unassigned') {
                 queryBuilder = queryBuilder.andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id });
             } else {
                 queryBuilder = queryBuilder.andWhere(
