@@ -74,6 +74,7 @@ export class TaskService {
         }
 
         if (filters.customerName) {
+            // const trimmedCustomerName = filters.customerName.trim();
             queryBuilder = queryBuilder.andWhere('customer.name LIKE :name', { name: `%${filters.customerName}%` });
         }
 
