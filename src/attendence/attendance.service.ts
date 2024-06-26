@@ -329,10 +329,13 @@ export class AttendanceService {
   }
 
   async getLastAttendanceByUserId(userId: number): Promise<Attendance> {
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
     return this.attendanceRepository.createQueryBuilder('attendance')
       .where('attendance.userId = :userId', { userId })
       .andWhere('attendance.deleted = :deleted', { deleted: false })
-      .orderBy('attendance.updatedOn', 'DESC')
+      .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
+      // .orderBy('attendance.updatedOn', 'DESC')
       .getOne();
   }
 
