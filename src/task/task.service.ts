@@ -42,7 +42,7 @@ export class TaskService {
             userName: string
         }, userId: number, sortByAsc: string, sortByDes: string): Promise<{ data: any[], total: number, fetchedCount: number }> {
         const where: any = {};
-            // console.log('45------', JSON.stringify(filters));
+        // console.log('45------', JSON.stringify(filters));
         if (filters.taskType) {
             where.taskType = filters.taskType;
         }
@@ -181,46 +181,96 @@ export class TaskService {
     // }
 
     async totalCount(userId: number): Promise<any> {
+
         const user = await this.userRepository.findOne({ where: { id: userId, deleted: false }, relations: ['role'] });
 
-        if (!user) {
-            throw new NotFoundException(`User with ID ${userId} not found`);
-        }
-        let tasks;
-        if (user.role.name === 'Admin') {
-            tasks = await this.taskRepository.createQueryBuilder('task')
+        const statuses = ['Assigned', 'Unassigned', 'Completed', 'Verified'];
+        const counts = {
+            assignedCount: 0,
+            unassignedCount: 0,
+            completedCount: 0,
+            verifiedCount: 0
+        };
+
+        for (const status of statuses) {
+            let countQuery = this.taskRepository.createQueryBuilder('task')
                 .where('task.deleted = :deleted', { deleted: false })
-                .getMany();
-        } else {
-            tasks = await this.taskRepository.createQueryBuilder('task')
-                .where('task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id })
-                .andWhere('task.deleted = :deleted', { deleted: false })
-                .getMany();
+                .andWhere('task.status = :status', { status });
+
+            if (user.role.name !== 'Admin') {
+                if (status.toLowerCase() === 'unassigned') {
+                    console.log('202-----');
+                    countQuery = countQuery.andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id });
+                } else {
+                    console.log('205-----');
+                    countQuery = countQuery.andWhere('task.assignTo = :userId', { userId: user.id });
+                }
+            }
+
+            const count = await countQuery.getCount();
+
+            switch (status) {
+                case 'Assigned':
+                    counts.assignedCount = count;
+                    break;
+                case 'Unassigned':
+                    counts.unassignedCount = count;
+                    break;
+                case 'Completed':
+                    counts.completedCount = count;
+                    break;
+                case 'Verified':
+                    counts.verifiedCount = count;
+                    break;
+            }
         }
-
-        let assignedCount = 0;
-        let unassignedCount = 0;
-        let completedCount = 0;
-        let verifiedCount = 0;
-        let visitedCount = 0;
-
-        tasks.forEach(task => {
-            if (task.status === 'Assigned') assignedCount++;
-            if (task.status === 'Unassigned') unassignedCount++;
-            if (task.status === 'Completed') completedCount++;
-            if (task.status === 'verified') verifiedCount++;
-            if (task.status === 'Visit') visitedCount++;
-        });
-
         return {
             totalCounts: {
-                Assigned: assignedCount,
-                Unassigned: unassignedCount,
-                Completed: completedCount,
-                Verify: verifiedCount,
-                Visit: visitedCount
+                counts
             }
         };
+
+        // const user = await this.userRepository.findOne({ where: { id: userId, deleted: false }, relations: ['role'] });
+
+        // if (!user) {
+        //     throw new NotFoundException(`User with ID ${userId} not found`);
+        // }
+        // let tasks;
+        // if (user.role.name === 'Admin') {
+        //     tasks = await this.taskRepository.createQueryBuilder('task')
+        //         .where('task.deleted = :deleted', { deleted: false })
+        //         .getMany();
+        // } else {
+        //     tasks = await this.taskRepository.createQueryBuilder('task')
+        //         .where('task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id })
+        //         .andWhere('task.deleted = :deleted', { deleted: false })
+        //         .getMany();
+
+        // }
+
+        // let assignedCount = 0;
+        // let unassignedCount = 0;
+        // let completedCount = 0;
+        // let verifiedCount = 0;
+        // let visitedCount = 0;
+
+        // tasks.forEach(task => {
+        //     if (task.status === 'Assigned') assignedCount++;
+        //     if (task.status === 'Unassigned') unassignedCount++;
+        //     if (task.status === 'Completed') completedCount++;
+        //     if (task.status === 'verified') verifiedCount++;
+        //     if (task.status === 'Visit') visitedCount++;
+        // });
+
+        // return {
+        //     totalCounts: {
+        //         Assigned: assignedCount,
+        //         Unassigned: unassignedCount,
+        //         Completed: completedCount,
+        //         Verify: verifiedCount,
+        //         Visit: visitedCount
+        //     }
+        // };
     }
 
     async findTaskById(id: number): Promise<{ data: any }> {
