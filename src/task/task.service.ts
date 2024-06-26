@@ -55,7 +55,7 @@ export class TaskService {
             .where('task.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('task.user', 'user', 'user.deleted = :deleted', { deleted: false })
             .leftJoinAndSelect('task.customer', 'customer', 'customer.deleted = :deleted', { deleted: false })
-            .orderBy('task.updatedOn', 'DESC')
+            .orderBy('task.createdOn', 'DESC')
             .andWhere(where);
 
         if (filters.startDate) {
@@ -70,7 +70,7 @@ export class TaskService {
         }
 
         if (filters.assignToName) {
-            queryBuilder = queryBuilder.andWhere('user.firstName = :firstName', { firstName: filters.assignToName });
+            queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `%${filters.customerName}%` });
         }
 
         if (filters.customerName) {

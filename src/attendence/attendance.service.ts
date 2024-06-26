@@ -262,7 +262,7 @@ export class AttendanceService {
     // Calculate total present and absent per user
     const userAttendanceMap: {
       [userId: number]: {
-        userId: number, totalpresent: number, totalabsent: number, totalLatePunchIn: number,
+        userId: number, userName: string, totalpresent: number, totalabsent: number, totalLatePunchIn: number,
         totalEarlyPunchout: number
       }
     } = {};
@@ -277,6 +277,7 @@ export class AttendanceService {
       if (!userAttendanceMap[userId]) {
         userAttendanceMap[userId] = {
           userId: userId,
+          userName: `${user.firstName} ${user.lastName}`,
           totalpresent: 0,
           totalabsent: 0,
           totalLatePunchIn: 0,
