@@ -262,7 +262,7 @@ export class AttendanceService {
     // Calculate total present and absent per user
     const userAttendanceMap: {
       [userId: number]: {
-        userId: number, userName: string, totalpresent: number, totalabsent: number, totalLatePunchIn: number,
+        userId: number, userName: string, totalPresent: number, totalAbsent: number, totalLatePunchIn: number,
         totalEarlyPunchout: number
       }
     } = {};
@@ -278,17 +278,17 @@ export class AttendanceService {
         userAttendanceMap[userId] = {
           userId: userId,
           userName: `${user.firstName} ${user.lastName}`,
-          totalpresent: 0,
-          totalabsent: 0,
+          totalPresent: 0,
+          totalAbsent: 0,
           totalLatePunchIn: 0,
           totalEarlyPunchout: 0
         };
       }
 
       if (attendance.status === 'Present') {
-        userAttendanceMap[userId].totalpresent++;
+        userAttendanceMap[userId].totalPresent++;
       } else if (attendance.status === 'Absent') {
-        userAttendanceMap[userId].totalabsent++;
+        userAttendanceMap[userId].totalAbsent++;
       }
       if (attendance.punchIn && attendance.punchOut) {
         const punchInTime = attendance.punchIn.split(":").map(Number);
