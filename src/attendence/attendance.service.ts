@@ -290,13 +290,13 @@ export class AttendanceService {
       } else if (attendance.status === 'Absent') {
         userAttendanceMap[userId].totalAbsent++;
       }
-      if (attendance.punchIn && attendance.isApproved == 'Rejected') {
+      if (attendance.punchIn && (attendance.isApproved == 'Rejected' || attendance.isNotify == true)) {
         const punchInTime = attendance.punchIn.split(":").map(Number);
         if (punchInTime[0] > parseInt(process.env.PUNCHIN_HOURS) || (punchInTime[0] === parseInt(process.env.PUNCHIN_HOURS) && punchInTime[1] > parseInt(process.env.PUNCHIN_MINUTES))) {
           userAttendanceMap[userId].totalLatePunchIn++;
         }
       }
-      if (attendance.punchOut && attendance.isApproved == 'Rejected') {
+      if (attendance.punchOut && (attendance.isApproved == 'Rejected' || attendance.isNotify == true)) {
         const punchOutTime = attendance.punchOut.split(":").map(Number);
         if (punchOutTime[0] < parseInt(process.env.PUNCHOUT_HOURS) || (punchOutTime[0] === parseInt(process.env.PUNCHOUT_HOURS) && punchOutTime[1] < parseInt(process.env.PUNCHOUT_MINUTES))) {
           userAttendanceMap[userId].totalEarlyPunchout++;
