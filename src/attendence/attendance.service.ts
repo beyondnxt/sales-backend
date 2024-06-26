@@ -63,6 +63,47 @@ export class AttendanceService {
     }
   }
 
+  // async handleAttendanceCheckOutUpdate() {
+  //   try {
+  //     const currentDate = new Date();
+  //     const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+
+  //     const users = await this.userRepository.find({
+  //       where: {
+  //         deleted: false
+  //       }
+  //     });
+
+  //     for (const user of users) {
+  //       const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
+  //         .where('attendance.userId = :userId', { userId: user.id })
+  //         .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
+  //         .andWhere('attendance.status = :status', { status: 'Present' })
+  //         .andWhere('attendance.punchOut IS NULL')
+  //         .getOne();
+
+  //       if (existingAttendance) {
+  //         const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
+  //           .where('mapLog.userId = :userId', { userId: user.id })
+  //           .orderBy('mapLog.createdOn', 'DESC')
+  //           .getOne();
+  //         if (lastMapLog) {
+  //           existingAttendance.punchOut = lastMapLog.createdOn.toISOString();
+  //           existingAttendance.punchOutLocation = lastMapLog.location.map(loc => `${loc.latitude},${loc.logtitude}`).join('; ');
+  //           await this.attendanceRepository.save(existingAttendance);
+  //         } else {
+  //           console.log(`No map log found for user ${user.id}.`);
+  //         }
+  //       } else {
+  //         console.log(`No existing attendance record to update for user ${user.id} for today.`);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error occurred during attendance update:', error);
+  //   }
+  // }
+
+
   async updatePunchIn(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
     if (!user) {

@@ -104,12 +104,21 @@ export class TaskService {
         const roleId = user.roleId;
         const role = await this.roleRepository.findOne({ where: { id: roleId, deleted: false } });
         const isAdmin = role.name == 'Admin';
+        // if (!isAdmin) {
+        //     // queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id })
+        //     queryBuilder = queryBuilder.andWhere(
+        //         '(task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId)',
+        //         { userId: user.id }
+        //     );
+        // }
         if (!isAdmin) {
-            // queryBuilder = queryBuilder.andWhere('task.assignTo = :userId', { userId: user.id })
-            queryBuilder = queryBuilder.andWhere(
-                '(task.assignTo = :userId OR JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId)',
-                { userId: user.id }
-            );
+            if (filters.taskType === 'Unassigned') {
+                queryBuilder = queryBuilder.andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id });
+            } else {
+                queryBuilder = queryBuilder.andWhere(
+                    'task.assignTo = :userId', { userId: user.id }
+                );
+            }
         }
 
         const [taskData, totalCount] = await Promise.all([
