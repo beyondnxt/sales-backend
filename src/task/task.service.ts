@@ -70,7 +70,7 @@ export class TaskService {
         }
 
         if (filters.assignToName) {
-            queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `%${filters.customerName}%` });
+            queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `%${filters.assignToName}%` });
         }
 
         if (filters.customerName) {
