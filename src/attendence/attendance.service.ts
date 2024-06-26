@@ -263,7 +263,7 @@ export class AttendanceService {
     const userAttendanceMap: {
       [userId: number]: {
         userId: number, userName: string, totalPresent: number, totalAbsent: number, totalLatePunchIn: number,
-        totalEarlyPunchout: number
+        totalEarlyPunchout: number, totalUnapprovedDays: number
       }
     } = {};
 
@@ -281,7 +281,8 @@ export class AttendanceService {
           totalPresent: 0,
           totalAbsent: 0,
           totalLatePunchIn: 0,
-          totalEarlyPunchout: 0
+          totalEarlyPunchout: 0,
+          totalUnapprovedDays: 0
         };
       }
 
@@ -301,6 +302,9 @@ export class AttendanceService {
         if (punchOutTime[0] < parseInt(process.env.PUNCHOUT_HOURS) || (punchOutTime[0] === parseInt(process.env.PUNCHOUT_HOURS) && punchOutTime[1] < parseInt(process.env.PUNCHOUT_MINUTES))) {
           userAttendanceMap[userId].totalEarlyPunchout++;
         }
+      }
+      if (attendance.isNotify === true) {
+        userAttendanceMap[userId].totalUnapprovedDays++;
       }
     });
 
