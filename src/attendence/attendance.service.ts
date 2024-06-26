@@ -318,7 +318,7 @@ export class AttendanceService {
     return {
       data: slicedData,
       fetchedCount: slicedData.length,
-      total: totalCount
+      total: data.length
     };
   }
 
