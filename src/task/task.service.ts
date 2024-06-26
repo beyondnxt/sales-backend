@@ -185,11 +185,11 @@ export class TaskService {
         const user = await this.userRepository.findOne({ where: { id: userId, deleted: false }, relations: ['role'] });
 
         const statuses = ['Assigned', 'Unassigned', 'Completed', 'Verified'];
-        const counts = {
-            assignedCount: 0,
-            unassignedCount: 0,
-            completedCount: 0,
-            verifiedCount: 0
+        const totalCounts = {
+            Assigned: 0,
+            Unassigned: 0,
+            Completed: 0,
+            Verify: 0
         };
 
         for (const status of statuses) {
@@ -199,10 +199,8 @@ export class TaskService {
 
             if (user.role.name !== 'Admin') {
                 if (status.toLowerCase() === 'unassigned') {
-                    console.log('202-----');
                     countQuery = countQuery.andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id });
                 } else {
-                    console.log('205-----');
                     countQuery = countQuery.andWhere('task.assignTo = :userId', { userId: user.id });
                 }
             }
@@ -211,23 +209,21 @@ export class TaskService {
 
             switch (status) {
                 case 'Assigned':
-                    counts.assignedCount = count;
+                    totalCounts.Assigned = count;
                     break;
                 case 'Unassigned':
-                    counts.unassignedCount = count;
+                    totalCounts.Unassigned = count;
                     break;
                 case 'Completed':
-                    counts.completedCount = count;
+                    totalCounts.Completed = count;
                     break;
                 case 'Verified':
-                    counts.verifiedCount = count;
+                    totalCounts.Verify = count;
                     break;
             }
         }
         return {
-            totalCounts: {
-                counts
-            }
+            totalCounts
         };
 
         // const user = await this.userRepository.findOne({ where: { id: userId, deleted: false }, relations: ['role'] });
