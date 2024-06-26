@@ -256,7 +256,7 @@ export class AttendanceService {
       queryBuilder = queryBuilder.andWhere('user.firstName LIKE :firstName', { firstName: `${filters.userName}%` });
     }
 
-    const totalCount = await queryBuilder.getCount();
+    // const totalCount = await queryBuilder.getCount();
     const attendances = await queryBuilder.getMany();
 
     // Calculate total present and absent per user
@@ -314,7 +314,7 @@ export class AttendanceService {
       return {
         data: data,
         fetchedCount: data.length,
-        total: totalCount
+        total: data.length
       };
     }
 
