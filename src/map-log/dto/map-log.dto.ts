@@ -7,6 +7,6 @@ export class CreateMapLogDto {
 
 export class LocationDto {
     latitude: string
-    logtitude: string
+    longitude: string
     createdOn: Date
 }

@@ -63,47 +63,75 @@ export class AttendanceService {
     }
   }
 
-  // async handleAttendanceCheckOutUpdate() {
-  //   try {
-  //     const currentDate = new Date();
-  //     const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
+  @Cron('0 30 20 * * *')
+  async handleAttendanceCheckOutUpdate() {
+    try {
+      const currentDate = new Date();
+      const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
 
-  //     const users = await this.userRepository.find({
-  //       where: {
-  //         deleted: false
-  //       }
-  //     });
+      const users = await this.userRepository.find({
+        where: {
+          deleted: false
+        }
+      });
 
-  //     for (const user of users) {
-  //       const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
-  //         .where('attendance.userId = :userId', { userId: user.id })
-  //         .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
-  //         .andWhere('attendance.status = :status', { status: 'Present' })
-  //         .andWhere('attendance.punchOut IS NULL')
-  //         .getOne();
+      for (const user of users) {
+        const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
+          .where('attendance.userId = :userId', { userId: user.id })
+          .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
+          .andWhere('attendance.status = :status', { status: 'Present' })
+          .andWhere('attendance.punchOut IS NULL')
+          .getOne();
 
-  //       if (existingAttendance) {
-  //         const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
-  //           .where('mapLog.userId = :userId', { userId: user.id })
-  //           .orderBy('mapLog.createdOn', 'DESC')
-  //           .getOne();
-  //         if (lastMapLog) {
-  //           existingAttendance.punchOut = lastMapLog.createdOn.toISOString();
-  //           existingAttendance.punchOutLocation = lastMapLog.location.map(loc => `${loc.latitude},${loc.logtitude}`).join('; ');
-  //           await this.attendanceRepository.save(existingAttendance);
-  //         } else {
-  //           console.log(`No map log found for user ${user.id}.`);
-  //         }
-  //       } else {
-  //         console.log(`No existing attendance record to update for user ${user.id} for today.`);
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.error('Error occurred during attendance update:', error);
-  //   }
-  // }
+        if (!existingAttendance) {
+          console.log(`No existing attendance record to update for user ${user.id} for today.`);
+          continue;
+        }
 
+        const company = await this.companyRepository.findOne({
+          where: { id: user.companyId, deleted: false }
+        });
 
+        const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
+          .where('mapLog.userId = :userId', { userId: user.id })
+          .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
+          .orderBy('mapLog.createdOn', 'DESC')
+          .getOne();
+
+        if (!lastMapLog) {
+          console.log(`No map log found for user ${user.id}.`);
+          continue;
+        }
+
+        const lastLocation = lastMapLog.location[lastMapLog.location.length - 1];
+        if (!lastLocation) {
+          console.log(`No location data found in the last map log for user ${user.id}.`);
+          continue;
+        }
+
+        const createdOnDate = new Date(lastMapLog.createdOn);
+        const hours = createdOnDate.getHours().toString().padStart(2, '0');
+        const minutes = createdOnDate.getMinutes().toString().padStart(2, '0');
+        const seconds = createdOnDate.getSeconds().toString().padStart(2, '0');
+        const timeOnly = `${hours}:${minutes}:${seconds}`;
+
+        existingAttendance.punchOut = timeOnly;
+        existingAttendance.punchOutLocation = `${lastLocation.latitude},${lastLocation.longitude}`;
+
+        const companyLocation = company.location;
+        const punchOutLocation = `${lastLocation.latitude},${lastLocation.longitude}`;
+        const kilometers = await this.calculateDistance(companyLocation, punchOutLocation);
+
+        existingAttendance.punchOutDistanceFromOffice = kilometers;
+        existingAttendance.record = 'Out';
+
+        await this.attendanceRepository.save(existingAttendance);
+      }
+    } catch (error) {
+      console.error('Error occurred during attendance update:', error);
+    }
+  }
+  
   async updatePunchIn(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
     if (!user) {
