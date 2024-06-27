@@ -114,6 +114,8 @@ export class TaskService {
         if (!isAdmin) {
             if (filters.status.toLowerCase() === 'unassigned') {
                 queryBuilder = queryBuilder.andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id });
+            } else if (filters.status.toLowerCase() === 'visit') {
+                queryBuilder = queryBuilder.andWhere('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, \'$.userId\')) = :userId', { userId: user.id });
             } else {
                 queryBuilder = queryBuilder.andWhere(
                     'task.assignTo = :userId', { userId: user.id }

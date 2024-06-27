@@ -109,6 +109,35 @@ export class AttendanceService {
           continue;
         }
 
+        // let lastLocationData: any;
+
+        // const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
+        //   .where('mapLog.userId = :userId', { userId: user.id })
+        //   .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
+        //   .orderBy('mapLog.createdOn', 'DESC')
+        //   .getOne();
+
+        // if (lastMapLog) {
+        //   lastLocationData = lastMapLog.location[lastMapLog.location.length - 1];
+        // } else {
+        //   const lastTask = await this.taskRepository.createQueryBuilder('task')
+        //     .where('task.assignTo = :userId', { userId: user.id })
+        //     .andWhere('DATE(task.updatedOn) = :date', { date: formattedDate })
+        //     .orderBy('task.updatedOn', 'DESC')
+        //     .getOne();
+
+        //   if (lastTask) {
+        //     lastLocationData = lastTask.location[lastTask.location.length - 1];
+        //   } else {
+        //     console.log(`No map log or task log found for user ${user.id}.`);
+        //     continue;
+        //   }
+        // }
+        // if (!lastLocationData) {
+        //   console.log(`No location data found in the last log for user ${user.id}.`);
+        //   continue;
+        // }
+
         const createdOnDate = new Date(lastMapLog.createdOn);
         const hours = createdOnDate.getHours().toString().padStart(2, '0');
         const minutes = createdOnDate.getMinutes().toString().padStart(2, '0');
