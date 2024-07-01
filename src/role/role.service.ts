@@ -20,7 +20,9 @@ export class RoleService {
     }
   }
 
-  async getAllRoles(page: number | "all" = 1, limit: number = 10, name: string): Promise<{ data: Role[], fetchedCount: number, totalCount: number }> {
+  async getAllRoles(page: number | "all" = 1, limit: number = 10, name: string,
+    sortByAsc?: string, sortByDes?: string
+  ): Promise<{ data: Role[], fetchedCount: number, totalCount: number }> {
     const where: any = {};
     if (name) {
       where.name = Like(`%${name}%`);
@@ -32,6 +34,16 @@ export class RoleService {
     if (page !== "all") {
       const skip = (page - 1) * limit;
       queryBuilder = queryBuilder.skip(skip).take(limit);
+    }
+
+    if (sortByAsc) {
+      const sortField = `role.${sortByAsc}`;
+      queryBuilder = queryBuilder.orderBy(sortField, 'ASC');
+    }
+
+    if (sortByDes) {
+      const sortField = `role.${sortByDes}`;
+      queryBuilder = queryBuilder.orderBy(sortField, 'DESC');
     }
 
     const [role, totalCount] = await Promise.all([
