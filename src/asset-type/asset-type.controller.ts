@@ -3,7 +3,7 @@ import { AssetType } from './entity/asset-type.entity';
 import { AssetTypeService } from './asset-type.service';
 import { CreateAssetTypeDto } from './dto/asset-type.dto';
 
-@Controller('asset-type')
+@Controller('assetType')
 export class AssetTypeController {
     constructor(
         private readonly assetTypeService: AssetTypeService

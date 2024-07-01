@@ -33,6 +33,7 @@ import { TeamModule } from './team/team.module';
 import { Team } from './team/entity/team.entity';
 import { AssetTypeModule } from './asset-type/asset-type.module';
 import { AssetType } from './asset-type/entity/asset-type.entity';
+import { AssetModule } from './asset/asset.module';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -65,7 +66,8 @@ import { AssetType } from './asset-type/entity/asset-type.entity';
     TaskModule,
     MapLogModule,
     TeamModule,
-    AssetTypeModule
+    AssetTypeModule,
+    AssetModule
   ],
   controllers: [AppController],
   providers: [AppService,
