@@ -31,6 +31,8 @@ import { MapLog } from './map-log/entity/map-log.entity';
 import { AuthenticationMiddleware } from './common/middleware/authentication.middleware';
 import { TeamModule } from './team/team.module';
 import { Team } from './team/entity/team.entity';
+import { AssetTypeModule } from './asset-type/asset-type.module';
+import { AssetType } from './asset-type/entity/asset-type.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -44,8 +46,8 @@ import { Team } from './team/entity/team.entity';
       username: configService.get('DB_USERNAME'),
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
-      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company, 
-        Task, MapLog, Team],
+      entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company,
+        Task, MapLog, Team, AssetType],
       synchronize: true,
     }),
     inject: [ConfigService],
@@ -62,7 +64,8 @@ import { Team } from './team/entity/team.entity';
     CompanyModule,
     TaskModule,
     MapLogModule,
-    TeamModule
+    TeamModule,
+    AssetTypeModule
   ],
   controllers: [AppController],
   providers: [AppService,
