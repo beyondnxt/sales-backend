@@ -15,7 +15,6 @@ export class AssetService {
         const asset = this.assetRepository.create(assetData);
         asset.createdBy = userId
         return await this.assetRepository.save(asset);
-
     }
 
     async findAll(page: number | 'all' = 1, limit: number = 10): Promise<{ data: any[], fetchedCount: number, totalCount: number }> {

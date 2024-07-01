@@ -16,9 +16,9 @@ export class UserController {
 
   @Get()
   async getUsersWithRole(@Query('page') page: number | "all" = 1, @Query('limit') limit: number, @Query('firstName') firstName: string,
-    @Query('lastName') lastName: string): Promise<{ data: any[], total: number }> {
+    @Query('lastName') lastName: string, @Query('sortByAsc') sortByAsc: string, @Query('sortByDes') sortByDes: string): Promise<{ data: any[], total: number }> {
     try {
-      return await this.userService.getUsersWithRoles(page, limit, firstName, lastName)
+      return await this.userService.getUsersWithRoles(page, limit, firstName, lastName, sortByAsc, sortByDes)
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.NOT_FOUND);
     }

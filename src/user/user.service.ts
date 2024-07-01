@@ -17,7 +17,8 @@ export class UserService {
         return user;
     }
 
-    async getUsersWithRoles(page: number | "all" = 1, limit: number = 10, firstName?: string, lastName?: string): Promise<{ data: any[], total: number }> {
+    async getUsersWithRoles(page: number | "all" = 1, limit: number = 10, firstName?: string, lastName?: string,
+        sortByAsc?: string, sortByDes?: string): Promise<{ data: any[], total: number }> {
         const where: any = {};
         if (firstName) {
             where.firstName = Like(`%${firstName}%`);
@@ -32,12 +33,25 @@ export class UserService {
             .leftJoinAndSelect('user.company', 'company', 'company.deleted = :deleted', { deleted: false })
             .where('user.deleted = :deleted', { deleted: false })
             .orderBy('user.createdOn', 'DESC')
-            .take(limit)
             .andWhere(where);
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
             queryBuilder = queryBuilder.skip(skip);
+        }
+        const sortMap = {
+            companyName: 'company.companyName',
+            roleName: 'role.name'
+        };
+
+        if (sortByAsc) {
+            const sortField = sortMap[sortByAsc] || `user.${sortByAsc}`;
+            queryBuilder = queryBuilder.orderBy(sortField, 'ASC');
+        }
+
+        if (sortByDes) {
+            const sortField = sortMap[sortByDes] || `user.${sortByDes}`;
+            queryBuilder = queryBuilder.orderBy(sortField, 'DESC');
         }
 
         const [users, totalCount] = await Promise.all([
