@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Asset } from "src/asset/entity/asset.entity";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'asset-type' })
 export class AssetType {
@@ -25,4 +26,7 @@ export class AssetType {
 
     @Column({ default: null })
     updatedBy: number
+
+    @OneToMany(() => Asset, asset => asset.assetType)
+    asset: Asset[];
 }

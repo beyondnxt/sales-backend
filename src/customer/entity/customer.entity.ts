@@ -1,4 +1,5 @@
 import { IsEmail } from "class-validator";
+import { Asset } from "src/asset/entity/asset.entity";
 import { Order } from "src/order/entity/order.entity";
 import { Task } from "src/task/entity/task.entity";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
@@ -65,4 +66,7 @@ export class Customer {
 
     @OneToMany(() => Task, task => task.customer)
     task: Task[]
+
+    @OneToMany(() => Asset, asset => asset.customer)
+    asset: Asset[];
 }

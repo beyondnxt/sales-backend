@@ -34,6 +34,7 @@ import { Team } from './team/entity/team.entity';
 import { AssetTypeModule } from './asset-type/asset-type.module';
 import { AssetType } from './asset-type/entity/asset-type.entity';
 import { AssetModule } from './asset/asset.module';
+import { Asset } from './asset/entity/asset.entity';
 
 @Module({
   imports: [ConfigModule.forRoot(),
@@ -48,7 +49,7 @@ import { AssetModule } from './asset/asset.module';
       password: configService.get('DB_PASSWORD'),
       database: configService.get('DB_NAME'),
       entities: [User, Role, Attendance, Customer, LeaveRequest, Product, Order, Expense, Company,
-        Task, MapLog, Team, AssetType],
+        Task, MapLog, Team, AssetType, Asset],
       synchronize: true,
     }),
     inject: [ConfigService],
