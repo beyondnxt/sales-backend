@@ -29,7 +29,7 @@ export class AttendanceService {
     private appGateway: WebsocketGateway,
   ) { }
 
-  @Cron('0 45 9 * * *')
+  @Cron('0 45 11 * * *')
   async handleAttendanceUpdate() {
     try {
       const currentDate = new Date();
@@ -63,17 +63,13 @@ export class AttendanceService {
     }
   }
 
-  @Cron('0 30 20 * * *')
+  @Cron('0 0 12 * * *')
   async handleAttendanceCheckOutUpdate() {
     try {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
 
-      const users = await this.userRepository.find({
-        where: {
-          deleted: false
-        }
-      });
+      const users = await this.userRepository.find({ where: { deleted: false } });
 
       for (const user of users) {
         const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
@@ -88,70 +84,69 @@ export class AttendanceService {
           continue;
         }
 
-        const company = await this.companyRepository.findOne({
-          where: { id: user.companyId, deleted: false }
-        });
+        const company = await this.companyRepository.findOne({ where: { id: user.companyId, deleted: false } });
 
-        const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
-          .where('mapLog.userId = :userId', { userId: user.id })
-          .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
-          .orderBy('mapLog.createdOn', 'DESC')
+        let lastLocation: any;
+        let lastDate: Date;
+        const lastTask = await this.taskRepository.createQueryBuilder('task')
+          .where('JSON_UNQUOTE(JSON_EXTRACT(task.createdBy, "$.userId")) = :userId', { userId: user.id })
+          .andWhere('DATE(task.createdOn) = :date', { date: formattedDate })
+          .orderBy('task.createdOn', 'DESC')
           .getOne();
 
-        if (!lastMapLog) {
-          console.log(`No map log found for user ${user.id}.`);
-          continue;
+        if (lastTask) {
+          lastLocation = lastTask.location;
+          lastDate = new Date(lastTask.createdOn);
+        } else {
+          const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
+            .where('mapLog.userId = :userId', { userId: user.id })
+            .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
+            .orderBy('mapLog.createdOn', 'DESC')
+            .getOne();
+
+          if (lastMapLog) {
+            lastLocation = lastMapLog.location;
+            lastDate = new Date(lastMapLog.createdOn);
+          }
+          else {
+            const attendance = await this.attendanceRepository.createQueryBuilder('attendance')
+              .where('attendance.userId = :userId', { userId: user.id })
+              .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
+              .andWhere('attendance.status = :status', { status: 'Present' })
+              .getOne();
+
+            if (attendance) {
+              existingAttendance.punchOut = attendance.punchIn;
+              existingAttendance.punchOutLocation = attendance.punchInLocation
+              existingAttendance.punchOutDistanceFromOffice = attendance.punchInDistanceFromOffice
+              existingAttendance.record = 'Out'
+              await this.attendanceRepository.save(existingAttendance);
+            } else {
+              console.log(`No map log, task log, or attendance found for user ${user.id}.`);
+              continue;
+            }
+          }
         }
 
-        const lastLocation = lastMapLog.location[lastMapLog.location.length - 1];
         if (!lastLocation) {
-          console.log(`No location data found in the last map log for user ${user.id}.`);
+          console.log(`No location data found in the last log for user ${user.id}.`);
           continue;
         }
 
-        // let lastLocationData: any;
-
-        // const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
-        //   .where('mapLog.userId = :userId', { userId: user.id })
-        //   .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
-        //   .orderBy('mapLog.createdOn', 'DESC')
-        //   .getOne();
-
-        // if (lastMapLog) {
-        //   lastLocationData = lastMapLog.location[lastMapLog.location.length - 1];
-        // } else {
-        //   const lastTask = await this.taskRepository.createQueryBuilder('task')
-        //     .where('task.assignTo = :userId', { userId: user.id })
-        //     .andWhere('DATE(task.updatedOn) = :date', { date: formattedDate })
-        //     .orderBy('task.updatedOn', 'DESC')
-        //     .getOne();
-
-        //   if (lastTask) {
-        //     lastLocationData = lastTask.location[lastTask.location.length - 1];
-        //   } else {
-        //     console.log(`No map log or task log found for user ${user.id}.`);
-        //     continue;
-        //   }
-        // }
-        // if (!lastLocationData) {
-        //   console.log(`No location data found in the last log for user ${user.id}.`);
-        //   continue;
-        // }
-
-        const createdOnDate = new Date(lastMapLog.createdOn);
+        const createdOnDate = lastDate;
         const hours = createdOnDate.getHours().toString().padStart(2, '0');
         const minutes = createdOnDate.getMinutes().toString().padStart(2, '0');
         const seconds = createdOnDate.getSeconds().toString().padStart(2, '0');
         const timeOnly = `${hours}:${minutes}:${seconds}`;
 
         existingAttendance.punchOut = timeOnly;
-        existingAttendance.punchOutLocation = `${lastLocation.latitude},${lastLocation.longitude}`;
+        existingAttendance.punchOutLocation = lastLocation;
 
         const companyLocation = company.location;
-        const punchOutLocation = `${lastLocation.latitude},${lastLocation.longitude}`;
+        const punchOutLocation = lastLocation;
         const kilometers = await this.calculateDistance(companyLocation, punchOutLocation);
 
-        existingAttendance.punchOutDistanceFromOffice = kilometers;
+        existingAttendance.punchOutDistanceFromOffice = kilometers || null;
         existingAttendance.record = 'Out';
 
         await this.attendanceRepository.save(existingAttendance);
@@ -160,7 +155,7 @@ export class AttendanceService {
       console.error('Error occurred during attendance update:', error);
     }
   }
-  
+
   async updatePunchIn(createAttendanceDto: CreateAttendanceDto, userId: number): Promise<Attendance> {
     const user = await this.userRepository.findOne({ where: { id: userId, deleted: false } })
     if (!user) {
@@ -237,27 +232,6 @@ export class AttendanceService {
   private deg2rad(deg: number): number {
     return deg * (Math.PI / 180);
   }
-
-  // async calculateGeolocationDifference(location: string, punchInLatitude: number, punchInLongitude: number): Promise<{ kilometers: number; meters: number }> {
-  //   const [companyLatitude, comapnyLongitude] = location.substring(1, location.length - 1).split(',').map(parseFloat);
-  //   const R = 6371; // Radius of the earth in kilometers
-  //   const dLat = this.deg2rad(punchInLatitude - companyLatitude);
-  //   const dLon = this.deg2rad(punchInLongitude - comapnyLongitude);
-  //   const a =
-  //     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-  //     Math.cos(this.deg2rad(companyLatitude)) * Math.cos(this.deg2rad(punchInLatitude)) *
-  //     Math.sin(dLon / 2) * Math.sin(dLon / 2);
-  //   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  //   const distance = R * c; // Distance in kilometers
-  //   console.log('distance', distance)
-  //   const distanceInMeters = distance * 1000; // Convert kilometers to meters
-  //   console.log('distanceInMeters', distanceInMeters)
-  //   return { kilometers: distance, meters: distanceInMeters };
-  // }
-
-  // private deg2rad(deg: number): number {
-  //   return deg * (Math.PI / 180);
-  // }
 
   async findAll(page: number | "all" = 1,
     limit: number = 10,
