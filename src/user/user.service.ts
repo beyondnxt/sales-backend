@@ -18,7 +18,7 @@ export class UserService {
     }
 
     async getUsersWithRoles(page: number | "all" = 1, limit: number = 10, firstName?: string, lastName?: string,
-        sortByAsc?: string, sortByDes?: string): Promise<{ data: any[], total: number }> {
+        sortByAsc?: string, sortByDes?: string): Promise<{ data: any[], fetchedCount: number, total: number }> {
         const where: any = {};
         if (firstName) {
             where.firstName = Like(`%${firstName}%`);
@@ -37,7 +37,7 @@ export class UserService {
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
-            queryBuilder = queryBuilder.skip(skip);
+            queryBuilder = queryBuilder.skip(skip).take(limit);
         }
         const sortMap = {
             companyName: 'company.companyName',
@@ -77,6 +77,7 @@ export class UserService {
                 updatedBy: user.updatedBy,
                 updatedOn: user.updatedOn
             })),
+            fetchedCount: users.length,
             total: totalCount
         };
     }
