@@ -29,7 +29,7 @@ export class AttendanceService {
     private appGateway: WebsocketGateway,
   ) { }
 
-  @Cron('0 45 9 * * *')
+  @Cron('0 0 10 * * *')
   async handleAttendanceUpdate() {
     try {
       const currentDate = new Date();
@@ -43,7 +43,7 @@ export class AttendanceService {
       for (const user of users) {
         const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
           .where('attendance.userId = :userId', { userId: user.id })
-          .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
+          .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
           .getOne();
 
         if (!existingAttendance) {
