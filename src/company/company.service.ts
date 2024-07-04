@@ -32,12 +32,47 @@ export class CompanyService {
         return await this.companyRepository.save(company);
     }
 
-    async findAll(page: number = 1, limit: number = 10): Promise<{ data: Company[], totalCount: number }> {
-        const [data, totalCount] = await this.companyRepository.findAndCount({
-            where: { deleted: false },
-            skip: (page - 1) * limit,
-            take: limit,
-        });
+    async findAll(
+        page: number | "all" = 1,
+        limit: number = 10,
+        sortByAsc?: string,
+        sortByDes?: string
+    ): Promise<{ data: Company[], totalCount: number }> {
+
+        let queryBuilder = this.companyRepository.createQueryBuilder('company')
+            .addSelect(`SUBSTRING_INDEX(company.location, ',', 1)`, 'latitude')
+            .addSelect(`SUBSTRING_INDEX(SUBSTRING_INDEX(company.location, ',', 2), ',', -1)`, 'longitude')
+            .where('company.deleted = :deleted', { deleted: false });
+
+        if (page !== "all") {
+            const skip = (page - 1) * limit;
+            queryBuilder = queryBuilder.skip(skip).take(limit);
+        }
+
+        const sortMap = {
+            companyName: 'company.companyName',
+            email: 'company.email',
+            phoneNo: 'company.phoneNo',
+            createdOn: 'company.createdOn',
+            latitude: 'latitude',
+            longitude: 'longitude'
+        };
+
+        if (sortByAsc) {
+            const sortField = sortMap[sortByAsc] || `company.${sortByAsc}`;
+            queryBuilder = queryBuilder.addOrderBy(sortField, 'ASC');
+        }
+
+        if (sortByDes) {
+            const sortField = sortMap[sortByDes] || `company.${sortByDes}`;
+            queryBuilder = queryBuilder.addOrderBy(sortField, 'DESC');
+        }
+
+        const [data, totalCount] = await Promise.all([
+            queryBuilder.getMany(),
+            queryBuilder.getCount()
+        ]);
+
         return { data, totalCount };
     }
 
