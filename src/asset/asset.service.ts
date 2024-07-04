@@ -21,19 +21,38 @@ export class AssetService {
         const where: any = {}
         let queryBuilder = this.assetRepository.createQueryBuilder('asset')
             .where('asset.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('asset.assetType', 'assetType', 'assetType.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('asset.customer', 'customer', 'customer.deleted = :deleted', { deleted: false })
+            .leftJoinAndSelect('asset.task', 'task', 'task.deleted = :deleted', { deleted: false })
             .andWhere(where);
 
         if (page !== "all") {
             const skip = (page - 1) * limit;
             queryBuilder = queryBuilder.skip(skip).take(limit);
         }
-        const [asset, totalCount] = await Promise.all([
+        const [assetData, totalCount] = await Promise.all([
             queryBuilder.getMany(),
             queryBuilder.getCount()
         ]);
         return {
-            data: asset,
-            fetchedCount: asset.length,
+            data: assetData.map(asset => ({
+                id: asset.id,
+                assetTypeId: asset.assetTypeId,
+                assetTypeName: asset.assetType.name,
+                customerId: asset.customerId,
+                customerName: asset.customer.name,
+                taskId: asset.taskId,
+                taskName: asset.task ? asset.task.taskType : null,
+                dateOfCommissioning: asset.dateOfCommissioning,
+                dateOfLastVisit: asset.dateOfLastVisit,
+                followUpDate: asset.followUpDate,
+                deleted: asset.deleted,
+                createdOn: asset.createdOn,
+                createdBy: asset.createdBy,
+                updatedOn: asset.updatedOn,
+                updatedBy: asset.updatedBy
+            })),
+            fetchedCount: assetData.length,
             totalCount: totalCount
         };
     }
