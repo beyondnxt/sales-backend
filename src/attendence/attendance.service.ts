@@ -29,8 +29,9 @@ export class AttendanceService {
     private appGateway: WebsocketGateway,
   ) { }
 
-  @Cron('0 45 9 * * *')
+  @Cron('0 26 13 * * *')
   async handleAttendanceUpdate() {
+    console.log('34---------');
     try {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
@@ -39,11 +40,12 @@ export class AttendanceService {
           deleted: false
         }
       })
-
+      console.log('currentDate-------', currentDate);
+      console.log('formattedDate-------', formattedDate);
       for (const user of users) {
         const existingAttendance = await this.attendanceRepository.createQueryBuilder('attendance')
           .where('attendance.userId = :userId', { userId: user.id })
-          .andWhere('DATE(attendance.createdOn) >= :date', { date: formattedDate })
+          .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
           .getOne();
 
         if (!existingAttendance) {
@@ -52,10 +54,12 @@ export class AttendanceService {
             status: 'Absent',
             record: 'Empty',
             createdOn: currentDate,
+            updatedOn: currentDate
           });
+          console.log('57-------', newAttendance);
           await this.attendanceRepository.save(newAttendance);
         } else {
-          console.log(`Attendance record already exists for user ${user.id} for today.`);
+          console.log(`Attendance record already exists for user ${user.id} for today.`, new Date());
         }
       }
     } catch (error) {
@@ -63,8 +67,9 @@ export class AttendanceService {
     }
   }
 
-  @Cron('0 0 18 * * *')
+  @Cron('0 43 13 * * *')
   async handleAttendanceCheckOutUpdate() {
+    console.log('checkout--------');
     try {
       const currentDate = new Date();
       const formattedDate = `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1).toString().padStart(2, '0')}-${currentDate.getDate().toString().padStart(2, '0')}`;
@@ -95,9 +100,11 @@ export class AttendanceService {
           .getOne();
 
         if (lastTask) {
+          console.log('lasttask------');
           lastLocation = lastTask.location;
           lastDate = new Date(lastTask.createdOn);
         } else {
+          console.log('map------');
           const lastMapLog = await this.mapLogRepository.createQueryBuilder('mapLog')
             .where('mapLog.userId = :userId', { userId: user.id })
             .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
@@ -105,10 +112,12 @@ export class AttendanceService {
             .getOne();
 
           if (lastMapLog) {
+            console.log('lastmap------');
             lastLocation = lastMapLog.location;
             lastDate = new Date(lastMapLog.createdOn);
           }
           else {
+            console.log('attendance------');
             const attendance = await this.attendanceRepository.createQueryBuilder('attendance')
               .where('attendance.userId = :userId', { userId: user.id })
               .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
@@ -116,12 +125,15 @@ export class AttendanceService {
               .getOne();
 
             if (attendance) {
+              console.log('lastattendance------');
               existingAttendance.punchOut = attendance.punchIn;
               existingAttendance.punchOutLocation = attendance.punchInLocation
               existingAttendance.punchOutDistanceFromOffice = attendance.punchInDistanceFromOffice
               existingAttendance.record = 'Out'
+              console.log('existingAttendance---', existingAttendance);
               await this.attendanceRepository.save(existingAttendance);
             } else {
+              console.log('136------');
               console.log(`No map log, task log, or attendance found for user ${user.id}.`);
               continue;
             }
@@ -205,7 +217,8 @@ export class AttendanceService {
         console.log("test");
       }
     }
-
+    attendance.updatedOn = new Date();
+    console.log('209-------', attendance);
     Object.assign(attendance, createAttendanceDto);
     return await this.attendanceRepository.save(attendance);
   }
@@ -239,7 +252,9 @@ export class AttendanceService {
       startDate?: Date,
       userName?: string,
       isNotify: string
-    }
+    },
+    sortByAsc?: string,
+    sortByDes?: string
   ): Promise<{ data: any[], fetchedCount: number, total: number }> {
     const whereCondition: any = {};
 
@@ -273,10 +288,57 @@ export class AttendanceService {
       queryBuilder = queryBuilder.skip(skip).take(limit);
     }
 
+    const sortMap = {
+      userName: 'user.firstName',
+      status: 'attendance.status', // Sort by firstName for userName
+      createdOn: 'attendance.createdOn',
+      punchIn: 'attendance.punchIn',
+      punchInDistanceFromOffice: 'attendance.punchInDistanceFromOffice',
+      punchOut: 'attendance.punchOut',
+      punchOutDistanceFromOffice: 'attendance.punchOutDistanceFromOffice'
+    };
+
+    if (sortByAsc) {
+      const sortField = sortMap[sortByAsc] || `attendance.${sortByAsc}`;
+      console.log('59------', sortField);
+      queryBuilder = queryBuilder.addOrderBy(sortField, 'ASC');
+      console.log('61------', queryBuilder);
+    }
+
+    if (sortByDes) {
+      const sortField = sortMap[sortByDes] || `attendance.${sortByDes}`;
+      queryBuilder = queryBuilder.addOrderBy(sortField, 'DESC');
+    }
+
+    // const sortMap = {
+    //   // userName: 'attendance.userName',
+    //   createdOn: 'attendance.createdOn',
+    //   punchIn: 'attendance.punchIn',
+    //   punchInDistanceFromOffice: 'attendance.punchInDistanceFromOffice',
+    //   punchOut: 'attendance.punchOut',
+    //   punchOutDistanceFromOffice: 'attendance.punchOutDistanceFromOffice'
+    // };
+
+
     const [attendances, totalCount] = await Promise.all([
       queryBuilder.getMany(),
       queryBuilder.getCount()
     ]);
+
+    // if (sortByAsc === 'userName') {
+    //   attendances.sort((a, b) => {
+    //     const nameA = `${a.user?.firstName} ${a.user?.lastName}`.toLowerCase();
+    //     const nameB = `${b.user?.firstName} ${b.user?.lastName}`.toLowerCase();
+    //     return nameA.localeCompare(nameB);
+    //   });
+    // } else if (sortByDes === 'userName') {
+    //   attendances.sort((a, b) => {
+    //     const nameA = `${a.user?.firstName} ${a.user?.lastName}`.toLowerCase();
+    //     const nameB = `${b.user?.firstName} ${b.user?.lastName}`.toLowerCase();
+    //     return nameB.localeCompare(nameA);
+    //   });
+    // }
+
     return {
       data: attendances.map(attendance => ({
         id: attendance.id,
@@ -306,10 +368,21 @@ export class AttendanceService {
     filters: {
       startDate?: string,
       userName?: string,
-    }
+    },
+    sortByAsc?: string,
+    sortByDes?: string
   ): Promise<{ data: any[], fetchedCount: number, total: number }> {
     const whereCondition: any = {};
 
+    const sortMap = {
+      userName: 'userName', // Placeholder for userName sorting
+      totalPresent: 'totalPresent',
+      totalAbsent: 'totalAbsent',
+      totalLatePunchIn: 'totalLatePunchIn',
+      totalEarlyPunchout: 'totalEarlyPunchout',
+      totalUnapprovedDays: 'totalUnapprovedDays'
+    };
+    
     let queryBuilder = this.attendanceRepository.createQueryBuilder('attendance')
       .leftJoinAndSelect('attendance.user', 'user', 'user.deleted = :deleted', { deleted: false })
       .where('attendance.deleted = :deleted', { deleted: false })
@@ -382,6 +455,23 @@ export class AttendanceService {
 
     const data = Object.values(userAttendanceMap);    // Convert userAttendanceMap to array format
 
+
+    if (sortByAsc || sortByDes) {
+      const sortField = sortByAsc || sortByDes;
+      const sortDirection = sortByDes ? 'DESC' : 'ASC';
+      const sortColumn = sortField === 'userName' ? 'userName' : sortMap[sortField];
+      data.sort((a, b) => {
+        if (sortDirection === 'ASC') {
+          return a[sortColumn] < b[sortColumn] ? -1 : 1;
+        } else {
+          return a[sortColumn] > b[sortColumn] ? -1 : 1;
+        }
+      });
+    }
+  
+    const totalCount = data.length;
+
+
     if (page === "all") {         // Return all data if page="all"
       return {
         data: data,
@@ -392,6 +482,27 @@ export class AttendanceService {
 
     const skip = (page - 1) * limit;        // Pagination logic if fetching specific page
     const slicedData = data.slice(skip, skip + limit);
+
+    // const sortMap = {
+    //   userName: 'user.firstName',
+    //   totalPresent: 'totalPresent',
+    //   totalAbsent: 'totalAbsent',
+    //   totalLatePunchIn: 'totalLatePunchIn',
+    //   totalEarlyPunchout: 'totalEarlyPunchout',
+    //   totalUnapprovedDays: 'totalUnapprovedDays'
+    // };
+
+    // if (sortByAsc) {
+    //   const sortField = sortMap[sortByAsc] || `attendance.${sortByAsc}`;
+    //   console.log('59------', sortField);
+    //   queryBuilder = queryBuilder.addOrderBy(sortField, 'ASC');
+    //   // console.log('61------', queryBuilder);
+    // }
+
+    // if (sortByDes) {
+    //   const sortField = sortMap[sortByDes] || `attendance.${sortByDes}`;
+    //   queryBuilder = queryBuilder.addOrderBy(sortField, 'DESC');
+    // }
 
     return {
       data: slicedData,

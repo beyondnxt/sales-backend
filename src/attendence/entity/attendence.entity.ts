@@ -52,7 +52,7 @@ export class Attendance {
   @Column({ default: null })
   updatedBy: number
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP'})
   updatedOn: Date
 
 }
