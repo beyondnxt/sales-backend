@@ -54,6 +54,7 @@ export class AttendanceService {
             createdOn: currentDate,
           });
           await this.attendanceRepository.save(newAttendance);
+          console.log('success')
         } else {
           console.log(`Attendance record already exists for user ${user.id} for today.`);
         }
