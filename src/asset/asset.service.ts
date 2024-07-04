@@ -35,7 +35,7 @@ export class AssetService {
             data: asset,
             fetchedCount: asset.length,
             totalCount: totalCount
-        };;
+        };
     }
 
     async findOne(id: number): Promise<Asset> {

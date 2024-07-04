@@ -1,5 +1,6 @@
 import { AssetType } from "src/asset-type/entity/asset-type.entity";
 import { Customer } from "src/customer/entity/customer.entity";
+import { Task } from "src/task/entity/task.entity";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'asset' })
@@ -20,6 +21,13 @@ export class Asset {
     @ManyToOne(() => Customer, customer => customer.asset)
     @JoinColumn({ name: 'customerId' })
     customer: Customer;
+
+    @Column({ default: null })
+    taskId: number
+
+    @ManyToOne(() => Task, task => task.asset)
+    @JoinColumn({ name: 'taskId' })
+    task: Task;
 
     @Column({ default: null })
     dateOfCommissioning: Date

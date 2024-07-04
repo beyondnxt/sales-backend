@@ -1,6 +1,7 @@
 export class CreateAssetDto {
     assetTypeId: number
     customerId: number
+    taskId: number
     dateOfCommissioning: Date
     dateOfLastVisit: string
     followUpDate: Date

@@ -1,6 +1,7 @@
+import { Asset } from "src/asset/entity/asset.entity";
 import { Customer } from "src/customer/entity/customer.entity";
 import { User } from "src/user/entity/user.entity";
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: 'task' })
 export class Task {
@@ -53,4 +54,7 @@ export class Task {
 
     @Column({ default: null })
     updatedBy: number
+
+    @OneToMany(() => Asset, asset => asset.task)
+    asset: Asset[];
 }
