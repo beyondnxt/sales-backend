@@ -33,10 +33,11 @@ export class AttendanceController {
     findAll(@Query('page') page: number | "all" = 1, @Query('limit') limit: number,
         @Query('startDate') startDate: Date,
         @Query('userName') userName: string,
-        @Query('isNotify') isNotify: string
+        @Query('isNotify') isNotify: string,
+        @Query('sortByAsc') sortByAsc?: string, @Query('sortByDes') sortByDes?: string
     ): Promise<{ data: any[], fetchedCount: number, total: number }> {
         try {
-            return this.attendanceService.findAll(page, limit, { startDate, userName, isNotify });
+            return this.attendanceService.findAll(page, limit, { startDate, userName, isNotify }, sortByAsc, sortByDes);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
@@ -45,10 +46,11 @@ export class AttendanceController {
     @Get('report')
     findReport(@Query('page') page: number | "all" = 1, @Query('limit') limit: number,
         @Query('startDate') startDate: string,
-        @Query('userName') userName: string
+        @Query('userName') userName: string,
+        @Query('sortByAsc') sortByAsc?: string, @Query('sortByDes') sortByDes?: string
     ): Promise<{ data: any[], fetchedCount: number, total: number }> {
         try {
-            return this.attendanceService.findReport(page, limit, { startDate, userName });
+            return this.attendanceService.findReport(page, limit, { startDate, userName }, sortByAsc, sortByDes);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
@@ -73,6 +75,7 @@ export class AttendanceController {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
     }
+
     @Put('updatePunchOut')
     updatePunchOut(@Body() updateAttendanceDto: CreateAttendanceDto, @Req() req: Request) {
         try {
