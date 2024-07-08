@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Query } from '@nestjs/common';
 import { MapLogService } from './map-log.service';
 import { MapLog } from './entity/map-log.entity';
-import { CreateMapLogDto, LocationDto } from './dto/map-log.dto';
+import { CreateMapLogDto } from './dto/map-log.dto';
 
 @Controller('maplog')
 export class MapLogController {
@@ -39,15 +39,15 @@ export class MapLogController {
         }
     }
 
-    @Put()
-    update(@Req() req: Request, @Body() locationData: LocationDto) {
-        try {
-            const userId = req.headers['userid']
-            return this.mapLogService.update(userId, locationData);
-        } catch (error) {
-            throw new HttpException(error.message, HttpStatus.NOT_FOUND);
-        }
-    }
+    // @Put()
+    // update(@Req() req: Request, @Body() locationData: LocationDto) {
+    //     try {
+    //         const userId = req.headers['userid']
+    //         return this.mapLogService.update(userId, locationData);
+    //     } catch (error) {
+    //         throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    //     }
+    // }
 
     @Delete(':id')
     remove(@Param('id') id: number) {

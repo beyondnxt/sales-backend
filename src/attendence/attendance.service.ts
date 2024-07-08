@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, MoreThanOrEqual, Repository } from 'typeorm';
 import { Attendance } from './entity/attendence.entity';
@@ -12,7 +12,8 @@ import { MapLog } from 'src/map-log/entity/map-log.entity';
 import { WebsocketGateway } from 'src/gateway/websocket.gateway';
 
 @Injectable()
-export class AttendanceService {
+export class AttendanceService implements OnModuleInit {
+  private intervalId: NodeJS.Timeout;
   constructor(
     @InjectRepository(Attendance)
     private readonly attendanceRepository: Repository<Attendance>,
@@ -28,6 +29,38 @@ export class AttendanceService {
     private readonly mapLogRepository: Repository<MapLog>,
     private appGateway: WebsocketGateway,
   ) { }
+
+  onModuleInit() {
+    this.handleTask();
+    this.startCheckingTime();
+  }
+
+  private handleTask() {
+    console.log('Task running at:', new Date());
+    this.handleAttendanceUpdate()
+    // Your function logic here
+  }
+
+  onModuleDestroy() {
+    clearInterval(this.intervalId);
+  }
+
+  startCheckingTime() {
+    this.intervalId = setInterval(() => {
+      const now = new Date();
+      const hours = now.getHours();
+      if (hours > 18) {
+        this.callYourFunction();
+      }
+    }, 60000); // Check every minute
+
+  }
+
+  callYourFunction() {
+    console.log('Function called after 6:00 PM');
+    this.handleAttendanceCheckOutUpdate()
+    // Add your function logic here
+  }
 
   @Cron('0 0 10 * * *')
   async handleAttendanceUpdate() {
@@ -93,7 +126,7 @@ export class AttendanceService {
           .andWhere('DATE(task.createdOn) = :date', { date: formattedDate })
           .orderBy('task.createdOn', 'DESC')
           .getOne();
-
+        console.log('lastTask', lastTask)
         if (lastTask) {
           lastLocation = lastTask.location;
           lastDate = new Date(lastTask.createdOn);
@@ -103,7 +136,7 @@ export class AttendanceService {
             .andWhere('DATE(mapLog.createdOn) = :date', { date: formattedDate })
             .orderBy('mapLog.createdOn', 'DESC')
             .getOne();
-
+          console.log('lastMapLog', lastMapLog)
           if (lastMapLog) {
             lastLocation = lastMapLog.location;
             lastDate = new Date(lastMapLog.createdOn);
@@ -114,10 +147,11 @@ export class AttendanceService {
               .andWhere('DATE(attendance.createdOn) = :date', { date: formattedDate })
               .andWhere('attendance.status = :status', { status: 'Present' })
               .getOne();
-
+            console.log('attendance', attendance)
             if (attendance) {
               existingAttendance.punchOut = attendance.punchIn;
               existingAttendance.punchOutLocation = attendance.punchInLocation
+              console.log('existingAttendance.punchOutLocation222', existingAttendance.punchOutLocation)
               existingAttendance.punchOutDistanceFromOffice = attendance.punchInDistanceFromOffice
               existingAttendance.record = 'Out'
               await this.attendanceRepository.save(existingAttendance);
@@ -141,7 +175,7 @@ export class AttendanceService {
 
         existingAttendance.punchOut = timeOnly;
         existingAttendance.punchOutLocation = lastLocation;
-
+        console.log(' existingAttendance.punchOutLocation111', existingAttendance.punchOutLocation)
         const companyLocation = company.location;
         const punchOutLocation = lastLocation;
         const kilometers = await this.calculateDistance(companyLocation, punchOutLocation);
@@ -202,7 +236,6 @@ export class AttendanceService {
       const isAdmin = role.name == 'Admin';
       if (isAdmin) {
         this.appGateway.server.emit('admin_notification', `User ${userId} punchIn from 3 kilometers away or 9.15 above`);
-        console.log("test");
       }
     }
     attendance.updatedOn = new Date();
@@ -210,7 +243,7 @@ export class AttendanceService {
     return await this.attendanceRepository.save(attendance);
   }
 
-  async calculateDistance(companyLocation: string, punchInLocation: string): Promise<number> {
+  async calculateDistance(companyLocation: string, punchInLocation: any): Promise<number> {
     // Convert latitude and longitude strings to numbers
     const [lat1, lon1] = companyLocation.split(',').map(parseFloat);
     const [lat2, lon2] = punchInLocation.split(',').map(parseFloat);
@@ -294,7 +327,7 @@ export class AttendanceService {
       const sortField = sortMap[sortByDes] || `attendance.${sortByDes}`;
       queryBuilder = queryBuilder.addOrderBy(sortField, 'DESC');
     }
-    
+
     const [attendances, totalCount] = await Promise.all([
       queryBuilder.getMany(),
       queryBuilder.getCount()
@@ -626,7 +659,6 @@ export class AttendanceService {
       const isAdmin = role.name == 'Admin';
       if (isAdmin) {
         this.appGateway.server.emit('admin_notification', `User ${userId} punchOut from 3 kilometers away or below 7.45`);
-        console.log("test");
       }
     }
     Object.assign(attendance, updateAttendanceDto);
